@@ -32,4 +32,4 @@
 ## References
 - [PyQt5-YOLOv5](https://github.com/Javacr/PyQt5-YOLOv5)
 - [ultralytics](https://github.com/ultralytics/ultralytics)
-- [Pyside6-YOLOv8](https://github.com/Jai-wei/YOLOv8-PySide6-GUI/tree/main)
+- [PySide6-YOLOv8](https://github.com/Jai-wei/YOLOv8-PySide6-GUI/tree/main)
