@@ -213,6 +213,7 @@ border-radius:10px</string>
                 <font>
                  <family>Nirmala UI</family>
                  <pointsize>12</pointsize>
+                 <weight>87</weight>
                  <italic>false</italic>
                  <bold>true</bold>
                 </font>
@@ -441,13 +442,13 @@ background-color: rgba(114, 129, 214, 59);
            <widget class="QFrame" name="VersionInfo">
             <property name="minimumSize">
              <size>
-              <width>200</width>
+              <width>235</width>
               <height>10</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>200</width>
+              <width>250</width>
               <height>15</height>
              </size>
             </property>
@@ -474,7 +475,7 @@ background-color: rgba(114, 129, 214, 59);
 color: rgba(255, 255, 255, 199);</string>
                </property>
                <property name="text">
-                <string>Version: 2.0</string>
+                <string>Version: 2.0-Beta</string>
                </property>
                <property name="alignment">
                 <set>Qt::AlignCenter</set>
@@ -910,6 +911,7 @@ border: 1px outset rgb(40, 125, 255);
                             <font>
                              <family>Segoe UI</family>
                              <pointsize>16</pointsize>
+                             <weight>87</weight>
                              <italic>true</italic>
                              <bold>true</bold>
                             </font>
@@ -994,6 +996,7 @@ font: 700 italic 16pt &quot;Segoe UI&quot;;</string>
                             <font>
                              <family>Microsoft YaHei UI</family>
                              <pointsize>17</pointsize>
+                             <weight>50</weight>
                              <italic>false</italic>
                              <bold>false</bold>
                              <underline>false</underline>
@@ -1104,6 +1107,7 @@ border: 1px outset rgb(252, 194, 149)
                             <font>
                              <family>Segoe UI</family>
                              <pointsize>16</pointsize>
+                             <weight>87</weight>
                              <italic>true</italic>
                              <bold>true</bold>
                             </font>
@@ -1188,6 +1192,7 @@ font: 700 italic 16pt &quot;Segoe UI&quot;;</string>
                             <font>
                              <family>Microsoft YaHei UI</family>
                              <pointsize>17</pointsize>
+                             <weight>50</weight>
                              <italic>false</italic>
                              <bold>false</bold>
                              <underline>false</underline>
@@ -1298,6 +1303,7 @@ border: 1px outset rgb(255, 125, 100)
                             <font>
                              <family>Segoe UI</family>
                              <pointsize>16</pointsize>
+                             <weight>87</weight>
                              <italic>true</italic>
                              <bold>true</bold>
                             </font>
@@ -1388,6 +1394,7 @@ font: 700 italic 16pt &quot;Segoe UI&quot;;</string>
                             <font>
                              <family>Microsoft YaHei UI</family>
                              <pointsize>17</pointsize>
+                             <weight>50</weight>
                              <italic>false</italic>
                              <bold>false</bold>
                              <underline>false</underline>
@@ -1498,6 +1505,7 @@ border: 1px outset rgb(72, 158, 204)
                             <font>
                              <family>Segoe UI</family>
                              <pointsize>16</pointsize>
+                             <weight>87</weight>
                              <italic>true</italic>
                              <bold>true</bold>
                             </font>
@@ -1588,6 +1596,7 @@ font: 700 italic 16pt &quot;Segoe UI&quot;;</string>
                             <font>
                              <family>Microsoft YaHei UI</family>
                              <pointsize>15</pointsize>
+                             <weight>50</weight>
                              <italic>false</italic>
                              <bold>false</bold>
                              <underline>false</underline>
@@ -1973,6 +1982,7 @@ border-radius:15px;
                        <font>
                         <family>Nirmala UI</family>
                         <pointsize>13</pointsize>
+                        <weight>87</weight>
                         <italic>false</italic>
                         <bold>true</bold>
                        </font>
@@ -2101,7 +2111,7 @@ QComboBox {
                       <property name="minimumContentsLength">
                        <number>0</number>
                       </property>
-                      <property name="placeholderText">
+                      <property name="placeholderText" stdset="0">
                        <string/>
                       </property>
                      </widget>
@@ -2154,6 +2164,7 @@ border-radius:15px;
                        <font>
                         <family>Nirmala UI</family>
                         <pointsize>13</pointsize>
+                        <weight>87</weight>
                         <italic>false</italic>
                         <bold>true</bold>
                        </font>
@@ -2382,6 +2393,7 @@ border-radius:15px;
                        <font>
                         <family>Nirmala UI</family>
                         <pointsize>13</pointsize>
+                        <weight>87</weight>
                         <italic>false</italic>
                         <bold>true</bold>
                        </font>
@@ -2610,6 +2622,7 @@ border-radius:15px;
                        <font>
                         <family>Nirmala UI</family>
                         <pointsize>13</pointsize>
+                        <weight>87</weight>
                         <italic>false</italic>
                         <bold>true</bold>
                        </font>
@@ -2838,6 +2851,7 @@ border-radius:15px;
                        <font>
                         <family>Nirmala UI</family>
                         <pointsize>13</pointsize>
+                        <weight>87</weight>
                         <italic>false</italic>
                         <bold>true</bold>
                        </font>
@@ -3420,15 +3434,6 @@ border-radius:15px;
                           </gradient>
                          </brush>
                         </colorrole>
-                        <colorrole role="PlaceholderText">
-                         <brush brushstyle="SolidPattern">
-                          <color alpha="128">
-                           <red>255</red>
-                           <green>255</green>
-                           <blue>255</blue>
-                          </color>
-                         </brush>
-                        </colorrole>
                        </active>
                        <inactive>
                         <colorrole role="WindowText">
@@ -3516,15 +3521,6 @@ border-radius:15px;
                             </color>
                            </gradientstop>
                           </gradient>
-                         </brush>
-                        </colorrole>
-                        <colorrole role="PlaceholderText">
-                         <brush brushstyle="SolidPattern">
-                          <color alpha="128">
-                           <red>255</red>
-                           <green>255</green>
-                           <blue>255</blue>
-                          </color>
                          </brush>
                         </colorrole>
                        </inactive>
@@ -3616,15 +3612,6 @@ border-radius:15px;
                           </gradient>
                          </brush>
                         </colorrole>
-                        <colorrole role="PlaceholderText">
-                         <brush brushstyle="SolidPattern">
-                          <color alpha="128">
-                           <red>255</red>
-                           <green>255</green>
-                           <blue>255</blue>
-                          </color>
-                         </brush>
-                        </colorrole>
                        </disabled>
                       </palette>
                      </property>
@@ -3701,6 +3688,7 @@ border: 1px outset rgb(40, 125, 255);
                             <font>
                              <family>Segoe UI</family>
                              <pointsize>16</pointsize>
+                             <weight>87</weight>
                              <italic>true</italic>
                              <bold>true</bold>
                             </font>
@@ -3785,6 +3773,7 @@ font: 700 italic 16pt &quot;Segoe UI&quot;;</string>
                             <font>
                              <family>Microsoft YaHei UI</family>
                              <pointsize>17</pointsize>
+                             <weight>50</weight>
                              <italic>false</italic>
                              <bold>false</bold>
                              <underline>false</underline>
@@ -3895,6 +3884,7 @@ border: 1px outset rgb(252, 194, 149)
                             <font>
                              <family>Segoe UI</family>
                              <pointsize>16</pointsize>
+                             <weight>87</weight>
                              <italic>true</italic>
                              <bold>true</bold>
                             </font>
@@ -3979,6 +3969,7 @@ font: 700 italic 16pt &quot;Segoe UI&quot;;</string>
                             <font>
                              <family>Microsoft YaHei UI</family>
                              <pointsize>17</pointsize>
+                             <weight>50</weight>
                              <italic>false</italic>
                              <bold>false</bold>
                              <underline>false</underline>
@@ -4089,6 +4080,7 @@ border: 1px outset rgb(255, 125, 100)
                             <font>
                              <family>Segoe UI</family>
                              <pointsize>16</pointsize>
+                             <weight>87</weight>
                              <italic>true</italic>
                              <bold>true</bold>
                             </font>
@@ -4179,6 +4171,7 @@ font: 700 italic 16pt &quot;Segoe UI&quot;;</string>
                             <font>
                              <family>Microsoft YaHei UI</family>
                              <pointsize>17</pointsize>
+                             <weight>50</weight>
                              <italic>false</italic>
                              <bold>false</bold>
                              <underline>false</underline>
@@ -4289,6 +4282,7 @@ border: 1px outset rgb(72, 158, 204)
                             <font>
                              <family>Segoe UI</family>
                              <pointsize>16</pointsize>
+                             <weight>87</weight>
                              <italic>true</italic>
                              <bold>true</bold>
                             </font>
@@ -4379,6 +4373,7 @@ font: 700 italic 16pt &quot;Segoe UI&quot;;</string>
                             <font>
                              <family>Microsoft YaHei UI</family>
                              <pointsize>15</pointsize>
+                             <weight>50</weight>
                              <italic>false</italic>
                              <bold>false</bold>
                              <underline>false</underline>
@@ -4764,6 +4759,7 @@ border-radius:15px;
                        <font>
                         <family>Nirmala UI</family>
                         <pointsize>13</pointsize>
+                        <weight>87</weight>
                         <italic>false</italic>
                         <bold>true</bold>
                        </font>
@@ -4892,7 +4888,7 @@ QComboBox {
                       <property name="minimumContentsLength">
                        <number>0</number>
                       </property>
-                      <property name="placeholderText">
+                      <property name="placeholderText" stdset="0">
                        <string/>
                       </property>
                      </widget>
@@ -4945,6 +4941,7 @@ border-radius:15px;
                        <font>
                         <family>Nirmala UI</family>
                         <pointsize>13</pointsize>
+                        <weight>87</weight>
                         <italic>false</italic>
                         <bold>true</bold>
                        </font>
@@ -5173,6 +5170,7 @@ border-radius:15px;
                        <font>
                         <family>Nirmala UI</family>
                         <pointsize>13</pointsize>
+                        <weight>87</weight>
                         <italic>false</italic>
                         <bold>true</bold>
                        </font>
@@ -5401,6 +5399,7 @@ border-radius:15px;
                        <font>
                         <family>Nirmala UI</family>
                         <pointsize>13</pointsize>
+                        <weight>87</weight>
                         <italic>false</italic>
                         <bold>true</bold>
                        </font>
@@ -5629,6 +5628,7 @@ border-radius:15px;
                        <font>
                         <family>Nirmala UI</family>
                         <pointsize>13</pointsize>
+                        <weight>87</weight>
                         <italic>false</italic>
                         <bold>true</bold>
                        </font>
