@@ -1,5 +1,5 @@
+####################ultralytics==8.0.229####################
 ####################cuda11.8####################
-####################8.0.235####################
 from ultralytics.engine.predictor import BasePredictor
 from ultralytics.models.yolo.detect.predict import DetectionPredictor
 from ultralytics.engine.results import Results
@@ -13,19 +13,17 @@ from ultralytics.data.augment import LetterBox, classify_transforms
 from ultralytics.cfg import get_cfg, get_save_dir
 from ultralytics.trackers import track
 from ultralytics import YOLO
-
 from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QMenu
 from PySide6.QtGui import QImage, QPixmap, QColor
 from PySide6.QtCore import QTimer, QThread, Signal, QObject, QPoint, Qt
 from ui.CustomMessageBox import MessageBox
 from ui.home import Ui_MainWindow
 from UIFunctions import *
-
 from collections import defaultdict
 from pathlib import Path
+from PIL import Image
 from utils.capnums import Camera
 from utils.rtsp_win import Window
-
 import numpy as np
 import threading
 import traceback
@@ -35,6 +33,32 @@ import torch
 import sys
 import cv2
 import os
+
+class CameraThread(QThread):
+    imageCaptured = Signal(np.ndarray)
+
+    def __init__(self, parent=None):
+        super(CameraThread, self).__init__(parent)
+        self.camera_source = 0  # 設置相機源，這裡使用默認相機
+
+    def run(self):
+        cap = cv2.VideoCapture(self.camera_source)
+
+        while (cap.isOpened()):
+            if self.isInterruptionRequested():
+                break
+
+            ret, frame = cap.read()
+            if ret:
+                self.imageCaptured.emit(frame)
+
+            else:
+                self.imageCaptured.emit(np.array([]))# 快完成了
+
+        cap.release()      
+
+
+
 
 class YoloPredictor(BasePredictor, QObject):
     # 信號定義，用於與其他部分進行通信
@@ -71,8 +95,6 @@ class YoloPredictor(BasePredictor, QObject):
         self.continue_dtc = True     # 暫停檢測的標誌
         self.save_res = False        # 保存測試結果的標誌
         self.save_txt = False        # 保存標籤（txt）文件的標誌
-        self.save_res_cam = False    # 保存webcam測試結果的標誌
-        self.save_txt_cam = False    # 保存webcam標籤（txt）文件的標誌
         self.iou_thres = 0.45        # IoU 閾值
         self.conf_thres = 0.25       # 置信度閾值
         self.speed_thres = 0         # 延遲，毫秒
@@ -101,8 +123,6 @@ class YoloPredictor(BasePredictor, QObject):
     # main for detect
     @smart_inference_mode()
     def run(self, *args, **kwargs):
-        print(str(self.save_txt)+'sssssssssss')
-        print(str(self.save_txt_cam)+'sssssssssss')
         try:
             if self.args.verbose:
                 LOGGER.info('')
@@ -117,8 +137,8 @@ class YoloPredictor(BasePredictor, QObject):
                 self.setup_source(self.source if self.source is not None else self.args.source)
 
                 # 檢查保存路徑/標籤
-                if self.save_res or self.save_txt or self.save_res_cam or self.save_txt_cam:
-                    (self.save_dir / 'labels' if (self.save_txt or self.save_txt_cam) else self.save_dir).mkdir(parents=True, exist_ok=True)
+                if self.save_res or self.save_txt:
+                    (self.save_dir / 'labels' if self.save_txt else self.save_dir).mkdir(parents=True, exist_ok=True)
 
                 # 模型預熱
                 if not self.done_warmup:
@@ -168,6 +188,7 @@ class YoloPredictor(BasePredictor, QObject):
                         # Preprocess
                         with profilers[0]:
                             if self.task == 'Classify':
+                                self._legacy_transform_name = 'ultralytics.yolo.data.augment.ToTensor'
                                 im = self.classify_preprocess(im0s)
                             else:
                                 im = self.preprocess(im0s)
@@ -195,7 +216,7 @@ class YoloPredictor(BasePredictor, QObject):
                             elif self.task == 'Track':
                                 model = YOLO(self.used_model_name)
                                 self.results = model.track(source=self.source, tracker="bytetrack.yaml")
-                                print(self.results)
+                                
                                 # pass
                         self.run_callbacks('on_predict_postprocess_end')
                         # Visualize, save, write results
@@ -209,7 +230,6 @@ class YoloPredictor(BasePredictor, QObject):
                             p, im0 = path[i], None if self.source_type.tensor else im0s[i].copy()
                             p = Path(p)
                             label_str = self.write_results(i, self.results, (p, im, im0))
-                            
                             # 標籤和數字字典
                             class_nums = 0
                             target_nums = 0
@@ -267,9 +287,16 @@ class YoloPredictor(BasePredictor, QObject):
     def classify_preprocess(self, img):
         """Converts input image to model-compatible data type."""
         if not isinstance(img, torch.Tensor):
-            img = torch.stack([self.transforms(im) for im in img], dim=0)
+            is_legacy_transform = any(self._legacy_transform_name in str(transform)
+                                      for transform in self.transforms.transforms)
+            if is_legacy_transform:  # to handle legacy transforms
+                img = torch.stack([self.transforms(im) for im in img], dim=0)
+            else:
+                img = torch.stack([self.transforms(Image.fromarray(cv2.cvtColor(im, cv2.COLOR_BGR2RGB))) for im in img],
+                                  dim=0)
         img = (img if isinstance(img, torch.Tensor) else torch.from_numpy(img)).to(self.model.device)
         return img.half() if self.model.fp16 else img.float()  # uint8 to fp16/32
+
 
     def classify_postprocess(self, preds, img, orig_imgs):
         """Post-processes predictions to return Results objects."""
@@ -411,6 +438,7 @@ class YoloPredictor(BasePredictor, QObject):
         
         if self.task == 'Classify':
             prob = results[idx].probs
+            print(prob)
             # for c in prob.top5:
             #     print(c)
         else:
@@ -422,7 +450,7 @@ class YoloPredictor(BasePredictor, QObject):
                 n = (det.cls == c).sum()  # detections per class
                 log_string += f"{n}~{self.model.names[int(c)]},"
 
-        if self.save_res or self.save_res_cam or self.args.save or self.args.show:  # Add bbox to image
+        if self.save_res or self.args.save or self.args.show:  # Add bbox to image
             plot_args = {
                 'line_width': self.args.line_width,
                 'boxes': self.args.show_boxes,
@@ -432,9 +460,7 @@ class YoloPredictor(BasePredictor, QObject):
                 plot_args['im_gpu'] = im[idx]
             self.plotted_img = result.plot(**plot_args)
         # Write
-        # if self.save_res_cam:
-        #     result.save(str(self.save_dir / p.name))
-        if self.save_txt or self.save_txt_cam:
+        if self.save_txt:
             result.save_txt(f'{self.txt_path}.txt', save_conf=self.args.save_conf)
         if self.args.save_crop:
             result.save_crop(save_dir=self.save_dir / 'crops',
@@ -927,6 +953,53 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             # 將 YOLO 實例的保存標籤的標誌設置為 True
             self.yolo_predict.save_txt = True
 
+    # 配置初始化
+    def load_config(self):
+        config_file = 'config/setting.json'
+        
+        # 如果配置文件不存在，則創建並寫入默認配置
+        if not os.path.exists(config_file):
+            iou = 0.26
+            conf = 0.33   
+            rate = 10
+            save_res = 0   
+            save_txt = 0    
+            new_config = {"iou": iou,
+                          "conf": conf,
+                          "rate": rate,
+                          "save_res": save_res,
+                          "save_txt": save_txt
+                          }
+            new_json = json.dumps(new_config, ensure_ascii=False, indent=2)
+            with open(config_file, 'w', encoding='utf-8') as f:
+                f.write(new_json)
+        else:
+            # 如果配置文件存在，讀取配置
+            config = json.load(open(config_file, 'r', encoding='utf-8'))
+            
+            # 檢查配置內容是否完整，如果不完整，使用默認值
+            if len(config) != 5:
+                iou = 0.26
+                conf = 0.33
+                rate = 10
+                save_res = 0
+                save_txt = 0
+            else:
+                iou = config['iou']
+                conf = config['conf']
+                rate = config['rate']
+                save_res = config['save_res']
+                save_txt = config['save_txt']
+        
+        # 根據配置設置界面元素的狀態
+        self.save_res_button.setCheckState(Qt.CheckState(save_res))
+        self.yolo_predict.save_res = (False if save_res == 0 else True)
+        self.save_txt_button.setCheckState(Qt.CheckState(save_txt)) 
+        self.yolo_predict.save_txt = (False if save_txt == 0 else True)
+        self.run_button.setChecked(False)
+        self.show_status("歡迎使用YOLOv8檢測系統，請選擇Mode")
+        # self.show_status("目前為image or video檢測頁面")
+
     # 終止按鈕及相關狀態處理
     def stop(self):
         # 如果 YOLO 線程正在運行，則終止線程
@@ -1229,13 +1302,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.show_status('NOTE：Label結果不會保存')
             
             # 將 YOLO 實例的保存標籤的標誌設置為 False
-            self.yolo_thread_cam.save_txt_cam = False
+            self.yolo_thread_cam.save_txt = False
         elif self.save_txt_button_cam.checkState() == Qt.CheckState.Checked:
             # 顯示消息，提示標籤結果將會保存
             self.show_status('NOTE：Label結果將會保存')
             
             # 將 YOLO 實例的保存標籤的標誌設置為 True
-            self.yolo_thread_cam.save_txt_cam = True
+            self.yolo_thread_cam.save_txt = True
 
 
     # cam終止按鈕及相關狀態處理
@@ -1357,67 +1430,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # 更新大小調整的手柄
         UIFuncitons.resize_grips(self)
 
-    # 配置初始化
-    def load_config(self):
-        config_file = 'config/setting.json'
-        
-        # 如果配置文件不存在，則創建並寫入默認配置
-        if not os.path.exists(config_file):
-            iou = 0.26
-            conf = 0.33
-            rate = 10
-            save_res = 0
-            save_txt = 0
-            save_res_cam = 0
-            save_txt_cam = 0
-            new_config = {"iou": iou,
-                          "conf": conf,
-                          "rate": rate,
-                          "save_res": save_res,
-                          "save_txt": save_txt,
-                          "save_res": save_res_cam,
-                          "save_txt": save_txt_cam
-                          }
-            new_json = json.dumps(new_config, ensure_ascii=False, indent=2)
-            with open(config_file, 'w', encoding='utf-8') as f:
-                f.write(new_json)
-        else:
-            # 如果配置文件存在，讀取配置
-            config = json.load(open(config_file, 'r', encoding='utf-8'))
-            
-            # 檢查配置內容是否完整，如果不完整，使用默認值
-            if len(config) != 7:
-                iou = 0.26
-                conf = 0.33
-                rate = 10
-                save_res = 0
-                save_txt = 0
-                save_res_cam = 0
-                save_txt_cam = 0
-            else:
-                iou = config['iou']
-                conf = config['conf']
-                rate = config['rate']
-                save_res = config['save_res']
-                save_txt = config['save_txt']
-                save_res_cam = config['save_res_cam']
-                save_txt_cam = config['save_txt_cam']
-        
-        # 根據配置設置界面元素的狀態
-        self.save_res_button.setCheckState(Qt.CheckState(save_res))
-        self.yolo_predict.save_res = (False if save_res == 0 else True)
-        self.save_txt_button.setCheckState(Qt.CheckState(save_txt)) 
-        self.yolo_predict.save_txt = (False if save_txt == 0 else True)
-        self.run_button.setChecked(False)
-
-        self.save_res_button_cam.setCheckState(Qt.CheckState(save_res_cam))
-        self.yolo_predict_cam.save_res_cam = (False if save_res_cam == 0 else True)
-        self.save_txt_button_cam.setCheckState(Qt.CheckState(save_txt_cam)) 
-        self.yolo_predict_cam.save_txt_cam = (False if save_txt_cam == 0 else True)
-        self.run_button_cam.setChecked(False)
-        self.show_status("歡迎使用YOLOv8檢測系統，請選擇Mode")
-        # self.show_status("目前為image or video檢測頁面")
-
     # 關閉事件，退出線程，保存設置
     def closeEvent(self, event):
         # 保存配置到設定文件
@@ -1428,20 +1440,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         config['rate'] = self.speed_spinbox.value()
         config['save_res'] = (0 if self.save_res_button.checkState()==Qt.Unchecked else 2)
         config['save_txt'] = (0 if self.save_txt_button.checkState()==Qt.Unchecked else 2)
-        config['save_res_cam'] = (0 if self.save_res_button_cam.checkState()==Qt.Unchecked else 2)
-        config['save_txt_cam'] = (0 if self.save_txt_button_cam.checkState()==Qt.Unchecked else 2)
         config_json = json.dumps(config, ensure_ascii=False, indent=2)
         with open(config_file, 'w', encoding='utf-8') as f:
             f.write(config_json)
         
         # 退出線程和應用程序
-        if self.yolo_thread.isRunning() or self.yolo_thread_cam.isRunning():
+        if self.yolo_thread.isRunning():
             # 如果 YOLO 線程正在運行，則終止線程
             self.yolo_predict.stop_dtc = True
             self.yolo_thread.quit()
-
-            self.yolo_predict_cam.stop_dtc = True
-            self.yolo_thread_cam.quit()            
+            
             # 顯示退出提示，等待3秒
             MessageBox(
                 self.close_button, title='Note', text='Exiting, please wait...', time=3000, auto=True).exec()
