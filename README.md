@@ -4,7 +4,7 @@
 
 ## How to Run
 - `python>=3.8`
-- `pip install ultralytics`
+- `pip install ultralytics==8.0.238`
 - `pip install pyside6`
 - `pip install chardet`
 - `conda install pytorch torchvision torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia`
