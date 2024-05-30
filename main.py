@@ -663,8 +663,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         ####################################camera####################################
 
         self.ToggleBotton.clicked.connect(lambda: UIFuncitons.toggleMenu(self, True))   # 左側導航按鈕
-        self.settings_button.clicked.connect(lambda: UIFuncitons.settingBox(self, True)) # 右上方設置按鈕
-       
         # 初始化
         self.load_config()
 
@@ -694,7 +692,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.src_file_button.setEnabled(True)
         self.src_cam_button.setEnabled(True)
         self.src_rtsp_button.setEnabled(True)
-        # self.settings_button.clicked.connect(lambda: UIFuncitons.settingBox(self, True))
+        self.settings_button.clicked.connect(lambda: UIFuncitons.settingBox(self, True)) # 右上方設置按鈕
 
         # 讀取模型文件夾
         self.pt_list = os.listdir('./models/classify/')
@@ -724,7 +722,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.src_file_button.setEnabled(True)
         self.src_cam_button.setEnabled(True)
         self.src_rtsp_button.setEnabled(True)
-        # self.settings_button.clicked.connect(lambda: UIFuncitons.settingBox(self, True))   # 右上方設置按鈕
+        self.settings_button.clicked.connect(lambda: UIFuncitons.settingBox(self, True)) # 右上方設置按鈕
 
         # 讀取模型文件夾
         self.pt_list = os.listdir('./models/detect/')
@@ -754,7 +752,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.src_file_button.setEnabled(True)
         self.src_cam_button.setEnabled(True)
         self.src_rtsp_button.setEnabled(True)
-        # self.settings_button.clicked.connect(lambda: UIFuncitons.settingBox(self, True))   # 右上方設置按鈕
+        self.settings_button.clicked.connect(lambda: UIFuncitons.settingBox(self, True)) # 右上方設置按鈕
 
         # 讀取模型文件夾
         self.pt_list = os.listdir('./models/pose/')
@@ -784,7 +782,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.src_file_button.setEnabled(True)
         self.src_cam_button.setEnabled(False)
         self.src_rtsp_button.setEnabled(True)
-        # self.settings_button.clicked.connect(lambda: UIFuncitons.settingBox(self, True))   # 右上方設置按鈕
+        self.settings_button.clicked.connect(lambda: UIFuncitons.settingBox(self, True)) # 右上方設置按鈕
 
         # 讀取模型文件夾
         self.pt_list = os.listdir('./models/segment/')
@@ -814,8 +812,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.src_file_button.setEnabled(True)
         self.src_cam_button.setEnabled(True)
         self.src_rtsp_button.setEnabled(True)
-        # self.settings_button.clicked.connect(lambda: UIFuncitons.settingBox(self, True))   # 右上方設置按鈕
-
+        self.settings_button.clicked.connect(lambda: UIFuncitons.settingBox(self, True)) # 右上方設置按鈕
+        
         # 讀取模型文件夾
         self.pt_list = os.listdir('./models/track/')
         self.pt_list = [file for file in self.pt_list if file.endswith(('.pt', 'onnx', 'engine'))]
@@ -854,46 +852,45 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.PageIndex != 0:
             self.PageIndex = 0
         self.content.setCurrentIndex(0)
-        self.settings_button.clicked.connect(lambda: UIFuncitons.settingBox(self, True))   # 右上方設置按鈕
+        self.settings_button.clicked.connect(lambda: UIFuncitons.settingBox(self, True)) # 右上方設置按鈕
 
-        if self.PageIndex == 0:
-            # 設置配置檔路徑
-            config_file = 'config/fold.json'
+        # 設置配置檔路徑
+        config_file = 'config/fold.json'
+        
+        # 讀取配置檔內容
+        config = json.load(open(config_file, 'r', encoding='utf-8'))
+        
+        # 獲取上次打開的資料夾路徑
+        open_fold = config['open_fold']
+        
+        # 如果上次打開的資料夾不存在，則使用當前工作目錄
+        if not os.path.exists(open_fold):
+            open_fold = os.getcwd()
+        
+        # 通過文件對話框讓用戶選擇圖片或影片檔案
+        if self.task == 'Track':
+            name, _ = QFileDialog.getOpenFileName(self, 'Video', open_fold, "Pic File(*.mp4 *.mkv *.avi *.flv)")
+        else:
+            name, _ = QFileDialog.getOpenFileName(self, 'Video/image', open_fold, "Pic File(*.mp4 *.mkv *.avi *.flv *.jpg *.png)")
+        
+        # 如果用戶選擇了檔案
+        if name:
+            # 將所選檔案的路徑設置為 yolo_predict 的 source
+            self.yolo_predict.source = name
             
-            # 讀取配置檔內容
-            config = json.load(open(config_file, 'r', encoding='utf-8'))
+            # 顯示檔案載入狀態
+            self.show_status('載入檔案：{}'.format(os.path.basename(name)))
             
-            # 獲取上次打開的資料夾路徑
-            open_fold = config['open_fold']
+            # 更新配置檔中的上次打開的資料夾路徑
+            config['open_fold'] = os.path.dirname(name)
             
-            # 如果上次打開的資料夾不存在，則使用當前工作目錄
-            if not os.path.exists(open_fold):
-                open_fold = os.getcwd()
+            # 將更新後的配置檔寫回到檔案中
+            config_json = json.dumps(config, ensure_ascii=False, indent=2)
+            with open(config_file, 'w', encoding='utf-8') as f:
+                f.write(config_json)
             
-            # 通過文件對話框讓用戶選擇圖片或影片檔案
-            if self.task == 'Track':
-                name, _ = QFileDialog.getOpenFileName(self, 'Video', open_fold, "Pic File(*.mp4 *.mkv *.avi *.flv)")
-            else:
-                name, _ = QFileDialog.getOpenFileName(self, 'Video/image', open_fold, "Pic File(*.mp4 *.mkv *.avi *.flv *.jpg *.png)")
-            
-            # 如果用戶選擇了檔案
-            if name:
-                # 將所選檔案的路徑設置為 yolo_predict 的 source
-                self.yolo_predict.source = name
-                
-                # 顯示檔案載入狀態
-                self.show_status('載入檔案：{}'.format(os.path.basename(name)))
-                
-                # 更新配置檔中的上次打開的資料夾路徑
-                config['open_fold'] = os.path.dirname(name)
-                
-                # 將更新後的配置檔寫回到檔案中
-                config_json = json.dumps(config, ensure_ascii=False, indent=2)
-                with open(config_file, 'w', encoding='utf-8') as f:
-                    f.write(config_json)
-                
-                # 停止檢測
-                self.stop()
+            # 停止檢測
+            self.stop()
                 
     # 主視窗顯示原始圖片和檢測結果
     @staticmethod
