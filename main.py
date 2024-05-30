@@ -4,7 +4,7 @@ from PySide6.QtCore import QTimer, QThread, Signal, QObject, QPoint, Qt
 from ui.CustomMessageBox import MessageBox
 from ui.home import Ui_MainWindow
 from UIFunctions import *
-from care import YoloPredictor
+from core import YoloPredictor
 
 from pathlib import Path
 from utils.rtsp_win import Window
