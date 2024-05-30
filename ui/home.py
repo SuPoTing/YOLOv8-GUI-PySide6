@@ -2891,7 +2891,7 @@ class Ui_MainWindow(object):
         self.src_cam_button.setText(QCoreApplication.translate("MainWindow", u"Camera", None))
         self.src_rtsp_button.setText(QCoreApplication.translate("MainWindow", u"Rtsp", None))
         self.src_home_button.setText(QCoreApplication.translate("MainWindow", u"Home", None))
-        self.VersionLabel.setText(QCoreApplication.translate("MainWindow", u"Version: 2.0", None))
+        self.VersionLabel.setText(QCoreApplication.translate("MainWindow", u"Version: 2.1", None))
         self.explain_title.setText(QCoreApplication.translate("MainWindow", u"YOLOv8", None))
         self.settings_button.setText("")
         self.min_sf.setText("")
@@ -2946,4 +2946,3 @@ class Ui_MainWindow(object):
         self.save_txt_button_cam.setText(QCoreApplication.translate("MainWindow", u"Save Labels(.txt)", None))
         self.status_bar.setText(QCoreApplication.translate("MainWindow", u"Welcome!", None))
     # retranslateUi
-
