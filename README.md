@@ -1,10 +1,10 @@
 # YoloSide ~ A GUI For YOLOv8 `V2.0-Beta`
 ---
-![](img/home.png)
+![](img/home_demo.png)
 
 ## How to Run
 - `python>=3.8`
-- `pip install ultralytics==8.0.238`
+- `pip install ultralytics==8.2.22`
 - `pip install pyside6`
 - `pip install chardet`
 - `conda install pytorch torchvision torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia`
@@ -14,7 +14,6 @@
 
 ## Notice
 - `ultralytics` follows the `GPL-3.0`, if you need commercial use, you need to obtain its license.
-- The tracking function is not yet complete.
 - If you expect to use your own model, you need to use `ultralytics` to train the yolov8/5 model first, and then put the trained `.pt` file into the `models/*` folder.
 - There are still some bugs in the software, and I will continue to optimize and add some more interesting functions as my time allows.
 - If you check the save results, they will be saved in the `./run` path
@@ -22,7 +21,6 @@
 - The resource file is `resources.qrc`, if you modify the default icon, you need to use the `pyside6-rcc resoures.qrc > ui/resources_rc.py` command to regenerate the `.py` file
 
 ## To Do
-
 - [ ] The input source supports camera(if you need this function urgently, you can modify it according to the `chose_rtsp`、`load_rtsp` function in `mian.py`)
 - [ ] Graph showing changes in target quantity
 - [ ] Target tracking
