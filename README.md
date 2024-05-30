@@ -23,8 +23,8 @@
 ## To Do
 - [ ] The input source supports camera(if you need this function urgently, you can modify it according to the `chose_rtsp`、`load_rtsp` function in `main.py`)
 - [ ] Graph showing changes in target quantity
-- [ ] Target tracking
-- [ ] Instance segmentation
+- [x] Target tracking
+- [x] Instance segmentation
 - [ ] Monitor system hardware usage
 
 ## References
