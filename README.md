@@ -21,7 +21,7 @@
 - The resource file is `resources.qrc`, if you modify the default icon, you need to use the `pyside6-rcc resoures.qrc > ui/resources_rc.py` command to regenerate the `.py` file
 
 ## To Do
-- [ ] The input source supports camera(if you need this function urgently, you can modify it according to the `chose_rtsp`、`load_rtsp` function in `mian.py`)
+- [ ] The input source supports camera(if you need this function urgently, you can modify it according to the `chose_rtsp`、`load_rtsp` function in `main.py`)
 - [ ] Graph showing changes in target quantity
 - [ ] Target tracking
 - [ ] Instance segmentation
