@@ -1,6 +1,6 @@
 # YoloSide ~ A GUI For YOLOv8 `V2.1`
 ---
-![](img/home_demo.png)
+![](preview.png)
 
 ## 環境配置
 - `python>=3.8`
