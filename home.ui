@@ -146,7 +146,7 @@ border-radius:30px
               </size>
              </property>
              <property name="styleSheet">
-              <string notr="true">image: url(:/all/img/logo.png);
+              <string notr="true">image: url(:/all/img/LOGO1.png);
 border:2px solid rgb(255, 255, 255);
 border-radius:10px</string>
              </property>
