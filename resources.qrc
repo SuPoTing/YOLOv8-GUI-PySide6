@@ -24,5 +24,7 @@
         <file>img/track.png</file>
         <file>img/logo.png</file>
         <file>img/home.png</file>
+        <file>img/LOGO0.png</file>
+        <file>img/LOGO1.png</file>
     </qresource>
 </RCC>
