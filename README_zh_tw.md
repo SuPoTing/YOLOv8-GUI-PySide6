@@ -1,5 +1,6 @@
 # YoloSide ~ A GUI For YOLOv8 `V2.1`
 ---
+[English](./README.md) | 繁體中文
 ![](preview.png)
 
 ## 環境配置
