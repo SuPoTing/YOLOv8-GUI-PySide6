@@ -106,12 +106,13 @@ class YoloPredictor(BasePredictor, QObject):
             self.yolo2main_status_msg.emit('模型載入中...')
             if not self.model:
                 if self.task == 'Track':
-                    track_history = defaultdict(lambda: [])
                     track_model = YOLO(self.new_model_name)
                 self.setup_model(self.new_model_name)
                 self.used_model_name = self.new_model_name
 
             with self._lock:  # for thread-safe inference
+                if self.task == 'Track':
+                    track_history = defaultdict(lambda: [])
                 # Setup source every time predict is called
                 self.setup_source(self.source if self.source is not None else self.args.source)
 
@@ -485,14 +486,13 @@ class YoloPredictor(BasePredictor, QObject):
 
     def save_predicted_images(self, save_path="", frame=0):
         """Save video predictions as mp4 at specified path."""
-        im = self.plotted_img
+        self.im = self.plotted_img
         if self.task == 'Track':
             for points in self.track_pointlist:
-                cv2.polylines(im, [points],
+                cv2.polylines(self.im, [points],
                               isClosed=False,
                               color=(203, 224, 252),
                               thickness=10)
-        self.im = im
         # Save videos and streams
         if self.dataset.mode in {"stream", "video"}:
             self.fps = self.dataset.fps if self.dataset.mode == "video" else 30
@@ -506,14 +506,14 @@ class YoloPredictor(BasePredictor, QObject):
                     filename=str(Path(save_path).with_suffix(suffix)),
                     fourcc=cv2.VideoWriter_fourcc(*fourcc),
                     fps=self.fps,  # integer required, floats produce error in MP4 codec
-                    frameSize=(im.shape[1], im.shape[0]),  # (width, height)
+                    frameSize=(self.im.shape[1], self.im.shape[0]),  # (width, height)
                 )
 
             # Save video
-            self.vid_writer[save_path].write(im)
+            self.vid_writer[save_path].write(self.im)
             if self.args.save_frames:
-                cv2.imwrite(f"{frames_path}{self.frame}.jpg", im)
+                cv2.imwrite(f"{frames_path}{self.frame}.jpg", self.im)
 
         # Save images
         if self.save_res:
-            cv2.imwrite(save_path, im)
+            cv2.imwrite(save_path, self.im)
