@@ -24,7 +24,7 @@
 
 ## 未來方向
 - [x] 輸入支援Camera
-- [ ] 支援`chose_rtsp`、`load_rtsp`函數
+- [x] 支援`chose_rtsp`、`load_rtsp`函數
 - [ ] 顯示目標數量變化的圖表
 - [x] 目標追蹤
 - [x] 實例分割
