@@ -571,7 +571,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # 結束image or video線程，節省資源
         if self.yolo_thread.isRunning() or self.yolo_thread_cam.isRunning():
             self.yolo_thread.quit() # 結束線程
-            self.yolo_thread_rtsp.quit()
+            self.yolo_thread_cam.quit()
             self.stop()
             self.cam_stop()
 
@@ -586,12 +586,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.show_status('並未檢測到攝影機')
             self.run_button_cam.setChecked(False)
 
-
         else:
             # 設置 YOLO 預測的停止標誌為 False
             self.yolo_predict_cam.stop_dtc = False
             
-        
             # 如果開始按鈕被勾選
             if self.run_button_cam.isChecked():
                 self.run_button_cam.setChecked(True)  # 啟動按鈕
@@ -740,7 +738,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             # 將 YOLO 實例的保存標籤的標誌設置為 True
             self.yolo_thread_cam.save_txt_cam = True
 
-
     # cam終止按鈕及相關狀態處理
     def cam_stop(self):
         # 如果 YOLO 線程正在運行，則終止線程
@@ -778,11 +775,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     ####################################rtsp####################################
     # rtsp輸入地址
     def rtsp_button(self):
-        if self.yolo_thread_cam.isRunning() or self.yolo_thread.isRunning():
-            self.yolo_thread_cam.quit() # 結束線程
-            self.yolo_thread.quit()
-            self.cam_stop()
+        # 結束image or video線程，節省資源
+        if self.yolo_thread.isRunning() or self.yolo_thread_cam.isRunning():
+            self.yolo_thread.quit() # 結束線程
+            self.yolo_thread_cam.quit()
             self.stop()
+            self.cam_stop()
 
         self.content.setCurrentIndex(2)
         self.show_status('目前頁面：rtsp檢測頁面')
@@ -817,6 +815,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.rtsp_window.close()
         except Exception as e:
             self.show_status('%s' % e)
+    ####################################rtsp####################################
     ####################################共用####################################
     # 顯示底部狀態欄信息
     def show_status(self, msg):
