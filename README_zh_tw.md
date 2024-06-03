@@ -1,4 +1,4 @@
-# YoloSide ~ A GUI For YOLOv8 `V2.1`
+# YoloSide ~ A GUI For YOLOv8 `V2.2`
 ---
 [English](./README.md) | 繁體中文
 
