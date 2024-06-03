@@ -193,7 +193,7 @@ class YoloPredictor(BasePredictor, QObject):
                                 self.progress_value = int(self.frame/self.frames*1000)
      
                             # 發送測試結果
-                            self.yolo2main_pre_img.emit(im0s if isinstance(im0s, np.ndarray) else im0s[0])   # 檢測前
+                            self.yolo2main_pre_img.emit(im0 if isinstance(im0, np.ndarray) else im0[0])   # 檢測前
                             self.yolo2main_res_img.emit(self.im) # 檢測後
                             # self.yolo2main_labels.emit(self.labels_dict)        # webcam 需要更改 def write_results
                             if self.task != 'Classify':
