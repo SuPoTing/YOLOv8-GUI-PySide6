@@ -185,9 +185,10 @@ class YoloPredictor(BasePredictor, QObject):
                             im0 = None if self.source_type.tensor else im0s[i].copy()
                             if 'no detections' in s:
                                 self.im = im0
-                            if self.frames != None and self.source != 0:
+                                
+                            if not isinstance(self.frames, list):
                                 self.progress_value = int(self.frame/self.frames*1000)
-                            else:
+                            elif self.source == 0 or self.source != '':
                                 self.frame = 1
                                 self.frames = 1
                                 self.progress_value = int(self.frame/self.frames*1000)
