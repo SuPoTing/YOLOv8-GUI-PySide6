@@ -84,7 +84,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # 選擇檢測來源
         self.src_file_button.clicked.connect(self.open_src_file)  # 選擇本地文件
-        self.src_rtsp_button.clicked.connect(self.show_status("The function has not yet been implemented."))#選擇 RTSP
 
         # 開始測試按鈕
         self.run_button.clicked.connect(self.run_or_continue)   # 暫停/開始
@@ -104,7 +103,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # YOLO-v8-cam線程
         self.yolo_predict_cam = YoloPredictor()                           # 創建 YOLO 實例
-        self.select_model_cam = self.model_box_cam.currentText()                   # 默認模型
+        self.select_model_cam = self.model_box_cam.currentText()          # 默認模型
         
         self.yolo_thread_cam = QThread()                                  # 創建 YOLO 線程
         self.yolo_predict_cam.yolo2main_pre_img.connect(lambda c: self.cam_show_image(c, self.pre_cam))
@@ -147,7 +146,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.save_res_button_cam.toggled.connect(self.cam_is_save_res)  # 保存圖片選項
         self.save_txt_button_cam.toggled.connect(self.cam_is_save_txt)  # 保存標籤選項
         ####################################camera####################################
-
+        ####################################rtsp####################################
+        self.src_rtsp_button.clicked.connect(self.rtsp_button)
+        ####################################rtsp####################################
         self.ToggleBotton.clicked.connect(lambda: UIFuncitons.toggleMenu(self, True))   # 左側導航按鈕
         # 初始化
         self.load_config()
@@ -335,6 +336,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.yolo_thread_cam.isRunning():
             self.yolo_thread_cam.quit() # 結束線程
             self.cam_stop()
+
         if self.PageIndex != 0:
             self.PageIndex = 0
         self.content.setCurrentIndex(0)
@@ -567,9 +569,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.yolo_predict_cam.source = 0
         self.show_status('目前頁面：Webcam檢測頁面')
         # 結束image or video線程，節省資源
-        if self.yolo_thread.isRunning():
+        if self.yolo_thread.isRunning() or self.yolo_thread_cam.isRunning():
             self.yolo_thread.quit() # 結束線程
+            self.yolo_thread_rtsp.quit()
             self.stop()
+            self.cam_stop()
 
         if self.PageIndex != 2:
             self.PageIndex = 2
@@ -581,6 +585,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.yolo_predict_cam.source == '':
             self.show_status('並未檢測到攝影機')
             self.run_button_cam.setChecked(False)
+
 
         else:
             # 設置 YOLO 預測的停止標誌為 False
@@ -770,7 +775,48 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.Target_num_cam.setText('--')
         self.fps_label_cam.setText('--')
     ####################################camera####################################
+    ####################################rtsp####################################
+    # rtsp輸入地址
+    def rtsp_button(self):
+        if self.yolo_thread_cam.isRunning() or self.yolo_thread.isRunning():
+            self.yolo_thread_cam.quit() # 結束線程
+            self.yolo_thread.quit()
+            self.cam_stop()
+            self.stop()
 
+        self.content.setCurrentIndex(2)
+        self.show_status('目前頁面：rtsp檢測頁面')
+        self.rtsp_window = Window()
+        config_file = 'config/ip.json'
+        if not os.path.exists(config_file):
+            ip = "rtsp://admin:admin888@192.168.1.2:555"
+            new_config = {"ip": ip}
+            new_json = json.dumps(new_config, ensure_ascii=False, indent=2)
+            with open(config_file, 'w', encoding='utf-8') as f:
+                f.write(new_json)
+        else:
+            config = json.load(open(config_file, 'r', encoding='utf-8'))
+            ip = config['ip']
+        self.rtsp_window.rtspEdit.setText(ip)
+        self.rtsp_window.show()
+        self.rtsp_window.rtspButton.clicked.connect(lambda: self.load_rtsp(self.rtsp_window.rtspEdit.text()))
+        self.settings_button.clicked.connect(lambda: UIFuncitons.cam_settingBox(self, True))   # 右上方設置按鈕
+
+    # 載入網路來源
+    def load_rtsp(self, ip):
+        try:
+            self.stop()
+            MessageBox(
+                self.close_button, title='提示', text='加載 rtsp...', time=1000, auto=True).exec()
+            self.yolo_predict_cam.source = ip
+            new_config = {"ip": ip}
+            new_json = json.dumps(new_config, ensure_ascii=False, indent=2)
+            with open('config/ip.json', 'w', encoding='utf-8') as f:
+                f.write(new_json)
+            self.show_status('Loading rtsp：{}'.format(ip))
+            self.rtsp_window.close()
+        except Exception as e:
+            self.show_status('%s' % e)
     ####################################共用####################################
     # 顯示底部狀態欄信息
     def show_status(self, msg):
