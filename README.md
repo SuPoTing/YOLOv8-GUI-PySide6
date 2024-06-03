@@ -24,7 +24,7 @@ English | [繁體中文](./README_zh_tw.md)
 
 ## To Do
 - [x] The input source supports camera
-- [x] if you need this function urgently, you can modify it according to the `chose_rtsp`、`load_rtsp` function in `main.py`
+- [x] Support `chose_rtsp`、`load_rtsp` function in `main.py`
 - [ ] Graph showing changes in target quantity
 - [x] Target tracking
 - [x] Instance segmentation
