@@ -157,6 +157,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # 0:image/video page
         # 1:home page
         # 2:camera page
+        if self.PageIndex != 1:
+            self.PageIndex = 1
         self.content.setCurrentIndex(1)
         self.yolo_predict_cam.source = ''
         self.src_home_button.setEnabled(False)
@@ -174,7 +176,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.task = 'Classify'
         self.yolo_predict.task = self.task
         self.yolo_predict_cam.task = self.task
-
+        if self.PageIndex != 0:
+            self.PageIndex = 0
         self.content.setCurrentIndex(0)
         self.src_home_button.setEnabled(True)
         self.src_file_button.setEnabled(True)
@@ -205,6 +208,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.yolo_predict_cam.task = self.task
         self.yolo_predict.new_model_name = "./models/detect/%s" % self.select_model
         self.yolo_predict_cam.new_model_name = "./models/detect/%s" % self.select_model_cam
+        if self.PageIndex != 0:
+            self.PageIndex = 0
         self.content.setCurrentIndex(0)
         self.src_home_button.setEnabled(True)
         self.src_file_button.setEnabled(True)
@@ -235,6 +240,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.yolo_predict_cam.task = self.task
         self.yolo_predict.new_model_name = "./models/pose/%s" % self.select_model
         self.yolo_predict_cam.new_model_name = "./models/pose/%s" % self.select_model_cam
+        if self.PageIndex != 0:
+            self.PageIndex = 0
         self.content.setCurrentIndex(0)
         self.src_home_button.setEnabled(True)
         self.src_file_button.setEnabled(True)
@@ -265,6 +272,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.yolo_predict_cam.task = self.task
         self.yolo_predict.new_model_name = "./models/segment/%s" % self.select_model
         self.yolo_predict_cam.new_model_name = "./models/segment/%s" % self.select_model_cam
+        if self.PageIndex != 0:
+            self.PageIndex = 0
         self.content.setCurrentIndex(0)
         self.src_home_button.setEnabled(True)
         self.src_file_button.setEnabled(True)
@@ -295,6 +304,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.yolo_predict_cam.task = self.task
         self.yolo_predict.new_model_name = "./models/track/%s" % self.select_model
         self.yolo_predict_cam.new_model_name = "./models/track/%s" % self.select_model_cam
+        if self.PageIndex != 0:
+            self.PageIndex = 0
         self.content.setCurrentIndex(0)
         self.src_home_button.setEnabled(True)
         self.src_file_button.setEnabled(True)
