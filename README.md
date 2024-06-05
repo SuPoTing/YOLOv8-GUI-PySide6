@@ -3,7 +3,6 @@
 <p align="center"> 
   <a href="https://github.com/SuPoTing/YOLOv8-GUI-PySide6/edit/main/README.md"> English</a> &nbsp; | &nbsp; 繁體中文</a>
  </p>
-English | [繁體中文](./README_zh_tw.md)
 
 ![](preview.png)
 
