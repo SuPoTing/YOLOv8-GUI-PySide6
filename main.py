@@ -168,6 +168,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.cam_stop()
         self.yolo_thread.quit()
         self.stop()
+        self.show_status("歡迎使用YOLOv8檢測系統，請選擇Mode")
 
     def button_classify(self):
         self.task = 'Classify'
