@@ -185,9 +185,16 @@ class YoloPredictor(BasePredictor, QObject):
                             im0 = None if self.source_type.tensor else im0s[i].copy()
                             if 'no detections' in s:
                                 self.im = im0
-                                
+
                             if not isinstance(self.frames, list):
                                 self.progress_value = int(self.frame/self.frames*1000)
+                                # 檢測完成動作
+                                if self.frame == self.frames:
+                                    for v in self.vid_writer.values():
+                                        if isinstance(v, cv2.VideoWriter):
+                                            v.release()
+                                    self.yolo2main_status_msg.emit('檢測完成')
+                                    break
                             elif self.source == 0 or self.source != '':
                                 self.frame = 1
                                 self.frames = 1
@@ -205,6 +212,7 @@ class YoloPredictor(BasePredictor, QObject):
                                 time.sleep(self.speed_thres/1000)   # 延遲，毫秒
 
                         self.yolo2main_progress.emit(self.progress_value)   # 進度條
+
                     # 終止檢測標誌檢測
                     if self.stop_dtc:
                         for v in self.vid_writer.values():
