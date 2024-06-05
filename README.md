@@ -1,8 +1,9 @@
 # YoloSide ~ A GUI For YOLOv8 `V2.2`
 ---
-<p align="center"> 
-  <a href="https://github.com/SuPoTing/YOLOv8-GUI-PySide6/blob/main/README.md"> English</a> &nbsp; | &nbsp; 繁體中文</a>
+  <p align="center"> 
+  English &nbsp; | &nbsp; <a href="https://github.com/SuPoTing/YOLOv8-GUI-PySide6/blob/main/README_zh_tw.md">繁體中文</a>
  </p>
+
 
 ![](preview.png)
 
