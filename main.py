@@ -37,6 +37,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.src_home_button.setEnabled(False)
         self.src_file_button.setEnabled(False)
+        self.src_img_button.setEnabled(False)
         self.src_cam_button.setEnabled(False)
         self.src_rtsp_button.setEnabled(False)
 
@@ -82,9 +83,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.fps_label.setText('--')
         self.Model_name.setText(self.select_model)
 
-        # 選擇檢測來源
+        # 選擇資料夾來源
         self.src_file_button.clicked.connect(self.open_src_file)  # 選擇本地文件
-
+        #單一檔案
+        self.src_img_button.clicked.connect(self.open_src_img)  # 選擇本地文件
         # 開始測試按鈕
         self.run_button.clicked.connect(self.run_or_continue)   # 暫停/開始
         self.stop_button.clicked.connect(self.stop)             # 終止
@@ -163,6 +165,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.yolo_predict_cam.source = ''
         self.src_home_button.setEnabled(False)
         self.src_file_button.setEnabled(False)
+        self.src_img_button.setEnabled(False)
         self.src_cam_button.setEnabled(False)
         self.src_rtsp_button.setEnabled(False)          
         # if self.yolo_thread_cam.isRunning() or self.yolo_thread.isRunning():
@@ -181,6 +184,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.content.setCurrentIndex(0)
         self.src_home_button.setEnabled(True)
         self.src_file_button.setEnabled(True)
+        self.src_img_button.setEnabled(True)
         self.src_cam_button.setEnabled(True)
         self.src_rtsp_button.setEnabled(True)
         self.settings_button.clicked.connect(lambda: UIFuncitons.settingBox(self, True)) # 右上方設置按鈕
@@ -213,6 +217,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.content.setCurrentIndex(0)
         self.src_home_button.setEnabled(True)
         self.src_file_button.setEnabled(True)
+        self.src_img_button.setEnabled(True)
         self.src_cam_button.setEnabled(True)
         self.src_rtsp_button.setEnabled(True)
         self.settings_button.clicked.connect(lambda: UIFuncitons.settingBox(self, True)) # 右上方設置按鈕
@@ -245,6 +250,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.content.setCurrentIndex(0)
         self.src_home_button.setEnabled(True)
         self.src_file_button.setEnabled(True)
+        self.src_img_button.setEnabled(True)
         self.src_cam_button.setEnabled(True)
         self.src_rtsp_button.setEnabled(True)
         self.settings_button.clicked.connect(lambda: UIFuncitons.settingBox(self, True)) # 右上方設置按鈕
@@ -277,6 +283,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.content.setCurrentIndex(0)
         self.src_home_button.setEnabled(True)
         self.src_file_button.setEnabled(True)
+        self.src_img_button.setEnabled(True)
         self.src_cam_button.setEnabled(True)
         self.src_rtsp_button.setEnabled(True)
         self.settings_button.clicked.connect(lambda: UIFuncitons.settingBox(self, True)) # 右上方設置按鈕
@@ -309,6 +316,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.content.setCurrentIndex(0)
         self.src_home_button.setEnabled(True)
         self.src_file_button.setEnabled(True)
+        self.src_img_button.setEnabled(True)
         self.src_cam_button.setEnabled(True)
         self.src_rtsp_button.setEnabled(True)
         self.settings_button.clicked.connect(lambda: UIFuncitons.settingBox(self, True)) # 右上方設置按鈕
@@ -333,6 +341,66 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     ####################################image or video####################################
     # 選擇本地檔案
     def open_src_file(self):
+        if self.task == 'Classify':
+            self.show_status("目前頁面：image or video檢測頁面，Mode：Classify")
+        if self.task == 'Detect':
+            self.show_status("目前頁面：image or video檢測頁面，Mode：Detect")
+        if self.task == 'Pose':
+            self.show_status("目前頁面：image or video檢測頁面，Mode：Pose")
+        if self.task == 'Segment':
+            self.show_status("目前頁面：image or video檢測頁面，Mode：Segment")
+        if self.task == 'Track':
+            self.show_status("目前頁面：image or video檢測頁面，Mode：Track")      
+            
+        # 結束cam線程，節省資源
+        if self.yolo_thread_cam.isRunning():
+            self.yolo_thread_cam.quit() # 結束線程
+            self.cam_stop()
+
+        if self.PageIndex != 0:
+            self.PageIndex = 0
+        self.content.setCurrentIndex(0)
+        self.settings_button.clicked.connect(lambda: UIFuncitons.settingBox(self, True)) # 右上方設置按鈕
+
+        # 設置配置檔路徑
+        config_file = 'config/fold.json'
+        
+        # 讀取配置檔內容
+        config = json.load(open(config_file, 'r', encoding='utf-8'))
+        
+        # 獲取上次打開的資料夾路徑
+        open_fold = config['open_fold']
+        
+        # 如果上次打開的資料夾不存在，則使用當前工作目錄
+        if not os.path.exists(open_fold):
+            open_fold = os.getcwd()
+        
+        if self.task == 'Track':
+            name = QFileDialog.getExistingDirectory(self, 'Select your Folder', open_fold)
+        else:
+            name = QFileDialog.getExistingDirectory(self, 'Select your Folder', open_fold)
+        
+        # 如果用戶選擇了檔案
+        if name:
+            # 將所選檔案的路徑設置為 yolo_predict 的 source
+            self.yolo_predict.source = name
+            
+            # 顯示檔案載入狀態
+            self.show_status('載入資料夾：{}'.format(os.path.dirname(name)))
+            
+            # 更新配置檔中的上次打開的資料夾路徑
+            config['open_fold'] = os.path.dirname(name)
+            
+            # 將更新後的配置檔寫回到檔案中
+            config_json = json.dumps(config, ensure_ascii=False, indent=2)
+            with open(config_file, 'w', encoding='utf-8') as f:
+                f.write(config_json)
+            
+            # 停止檢測
+            self.stop()
+
+    # 選擇本地檔案
+    def open_src_img(self):
         if self.task == 'Classify':
             self.show_status("目前頁面：image or video檢測頁面，Mode：Classify")
         if self.task == 'Detect':
@@ -448,7 +516,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 if not self.yolo_thread.isRunning():
                     self.yolo_thread.start()
                     self.main2yolo_begin_sgl.emit()
-
             # 如果開始按鈕未被勾選，表示暫停檢測
             else:
                 self.yolo_predict.continue_dtc = False
@@ -1003,17 +1070,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             iou = 0.26
             conf = 0.33
             rate = 10
-            save_res = 0
-            save_txt = 0
-            save_res_cam = 0
-            save_txt_cam = 0
+            self.save_res = 0
+            self.save_txt = 0
+            self.save_res_cam = 0
+            self.save_txt_cam = 0
             new_config = {"iou": iou,
                           "conf": conf,
                           "rate": rate,
-                          "save_res": save_res,
-                          "save_txt": save_txt,
-                          "save_res": save_res_cam,
-                          "save_txt": save_txt_cam
+                          "save_res": self.save_res,
+                          "save_txt": self.save_txt,
+                          "save_res": self.save_res_cam,
+                          "save_txt": self.save_txt_cam
                           }
             new_json = json.dumps(new_config, ensure_ascii=False, indent=2)
             with open(config_file, 'w', encoding='utf-8') as f:
