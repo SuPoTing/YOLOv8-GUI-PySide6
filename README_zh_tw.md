@@ -12,7 +12,7 @@
 - `pip install pyside6`
 - `pip install chardet`
 - `conda install pytorch torchvision torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia`
-- `python main.py`
+- `python main.py or python main_en.py`
 
 #### !!必須安裝對應版本套件包
 
