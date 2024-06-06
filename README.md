@@ -29,6 +29,7 @@
 - [x] The input source supports camera
 - [x] Support `chose_rtsp`、`load_rtsp` function in `main.py`
 - [ ] Graph showing changes in target quantity
+- [x] Added batch detection function
 - [x] Target tracking
 - [x] Instance segmentation
 - [ ] Monitor system hardware usage
