@@ -5,7 +5,7 @@
  </p>
 
 
-![](preview.png)
+![](preview_ui.png)
 
 ## How to Run
 - `python>=3.8`
