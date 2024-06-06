@@ -4,7 +4,7 @@
   <a href="https://github.com/SuPoTing/YOLOv8-GUI-PySide6/blob/main/README.md"> English</a> &nbsp; | &nbsp; 繁體中文</a>
  </p>
 
-![](preview.png)
+![](preview_ui.png)
 
 ## 環境配置
 - `python>=3.8`
