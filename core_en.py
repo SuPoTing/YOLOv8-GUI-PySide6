@@ -31,52 +31,52 @@ import cv2
 import os
 
 class YoloPredictor(BasePredictor, QObject):
-    # 信號定義，用於與其他部分進行通信
-    yolo2main_pre_img = Signal(np.ndarray)   # 原始圖像信號
-    yolo2main_res_img = Signal(np.ndarray)   # 測試結果信號
-    yolo2main_status_msg = Signal(str)       # 檢測/暫停/停止/測試完成/錯誤報告信號
-    yolo2main_fps = Signal(str)              # 幀率信號
-    yolo2main_labels = Signal(dict)          # 檢測目標結果（每個類別的數量）
-    yolo2main_progress = Signal(int)         # 完整度信號
-    yolo2main_class_num = Signal(int)        # 檢測到的類別數量
-    yolo2main_target_num = Signal(int)       # 檢測到的目標數量
+    # Signal definitions for communication with other parts
+    yolo2main_pre_img = Signal(np.ndarray)   # Original image signal
+    yolo2main_res_img = Signal(np.ndarray)   # Test result signal
+    yolo2main_status_msg = Signal(str)       # Detection/pause/stop/test completed/error report signal
+    yolo2main_fps = Signal(str)              # Frame rate signal
+    yolo2main_labels = Signal(dict)          # Detection target results (number of each class)
+    yolo2main_progress = Signal(int)         # Progress signal
+    yolo2main_class_num = Signal(int)        # Number of detected classes
+    yolo2main_target_num = Signal(int)       # Number of detected targets
 
     def __init__(self, cfg=DEFAULT_CFG, overrides=None, _callbacks=None):
-        # 調用父類的初始化方法
+        # Call the initialization method of the parent class
         super(YoloPredictor, self).__init__()
-        # 初始化 PyQt 的 QObject
+        # Initialize PyQt's QObject
         QObject.__init__(self)
 
-        # 解析配置文件
+        # Parse the configuration file
         self.args = get_cfg(cfg, overrides)
-        # 設置模型保存目錄
+        # Set the model save directory
         self.save_dir = get_save_dir(self.args)
-        # 初始化一個標誌，標記模型是否已經完成預熱（warmup）
+        # Initialize a flag to mark whether the model has completed warm-up
         self.done_warmup = False
-        # 檢查是否要顯示圖像
+        # Check if images should be displayed
         if self.args.show:
             self.args.show = check_imshow(warn=True)
 
         self._legacy_transform_name = "ultralytics.yolo.data.augment.ToTensor"
 
-        # GUI 相關的屬性
-        self.used_model_name = None  # 要使用的檢測模型的名稱
-        self.new_model_name = None   # 實時更改的模型名稱
-        self.source = ''             # 輸入源
-        self.stop_dtc = False        # 終止檢測的標誌
-        self.continue_dtc = True     # 暫停檢測的標誌
-        self.save_res = False        # 保存測試結果的標誌
-        self.save_txt = False        # 保存標籤（txt）文件的標誌
-        self.save_res_cam = False    # 保存webcam測試結果的標誌
-        self.save_txt_cam = False    # 保存webcam標籤（txt）文件的標誌
-        self.iou_thres = 0.45        # IoU 閾值
-        self.conf_thres = 0.25       # 置信度閾值
-        self.speed_thres = 0         # 延遲，毫秒
-        self.labels_dict = {}        # 返回檢測結果的字典
-        self.progress_value = 0      # 進度條的值
+        # GUI-related attributes
+        self.used_model_name = None  # Name of the detection model to be used
+        self.new_model_name = None   # Name of the model changed in real-time
+        self.source = ''             # Input source
+        self.stop_dtc = False        # Flag to terminate detection
+        self.continue_dtc = True     # Flag to pause detection
+        self.save_res = False        # Flag to save test results
+        self.save_txt = False        # Flag to save label (txt) files
+        self.save_res_cam = False    # Flag to save webcam test results
+        self.save_txt_cam = False    # Flag to save webcam label (txt) files
+        self.iou_thres = 0.45        # IoU threshold
+        self.conf_thres = 0.25       # Confidence threshold
+        self.speed_thres = 0         # Delay, milliseconds
+        self.labels_dict = {}        # Dictionary returning detection results
+        self.progress_value = 0      # Value of the progress bar
         self.task = ''
 
-        # 如果設置已完成，可以使用以下屬性
+        # Properties that can be used once setup is completed
         self.model = None
         self.data = self.args.data  # data_dict
         self.imgsz = None
@@ -93,6 +93,7 @@ class YoloPredictor(BasePredictor, QObject):
         self.callbacks = _callbacks or callbacks.get_default_callbacks()
         self.txt_path = None
         self.frames = None
+        self.fps = None
         self._lock = threading.Lock()  # for automatic thread-safe inference
         callbacks.add_integration_callbacks(self)
 
@@ -103,24 +104,23 @@ class YoloPredictor(BasePredictor, QObject):
             if self.args.verbose:
                 LOGGER.info('')
             # Setup model
-            self.yolo2main_status_msg.emit('模型載入中...')
+            self.yolo2main_status_msg.emit('Loading model...')
             if not self.model:
                 if self.task == 'Track':
                     track_model = YOLO(self.new_model_name)
                 self.setup_model(self.new_model_name)
                 self.used_model_name = self.new_model_name
-
             with self._lock:  # for thread-safe inference
                 if self.task == 'Track':
                     track_history = defaultdict(lambda: [])
                 # Setup source every time predict is called
                 self.setup_source(self.source if self.source is not None else self.args.source)
 
-                # 檢查保存路徑/標籤
+                # Check save path/labels
                 if self.save_res or self.save_txt or self.save_res_cam or self.save_txt_cam:
                     (self.save_dir / 'labels' if (self.save_txt or self.save_txt_cam) else self.save_dir).mkdir(parents=True, exist_ok=True)
 
-                # 模型預熱
+                # Model warm-up
                 if not self.done_warmup:
                     self.model.warmup(imgsz=(1 if self.model.pt or self.model.triton else self.dataset.bs, 3, *self.imgsz))
                     self.done_warmup = True
@@ -131,20 +131,26 @@ class YoloPredictor(BasePredictor, QObject):
                     ops.Profile(device=self.device),
                     ops.Profile(device=self.device),
                 )
-                for self.batch in self.dataset: 
-                    # 在中途更改模型
+
+                batch = iter(self.dataset)
+                while True:
+                    # for self.batch in self.dataset: 
+                    # Change model midway
                     if self.used_model_name != self.new_model_name:  
                         # self.yolo2main_status_msg.emit('Change Model...')
                         if self.task == 'Track':
                             track_model = YOLO(self.used_model_name)
                         self.setup_model(self.new_model_name)
                         self.used_model_name = self.new_model_name
-                    
-                    # 暫停開關
+
+                    # Pause switch
                     if self.continue_dtc:
-                        # time.sleep(0.001)
-                        self.yolo2main_status_msg.emit('檢測中...')
-                        # batch = next(self.dataset)  # 獲取下一個數據
+                        try:
+                            batch = next(self.dataset)  # next data
+                        except StopIteration:
+                            break
+                        self.batch = batch
+                        self.yolo2main_status_msg.emit('Detecting...')
 
                         paths, im0s, s = self.batch
 
@@ -185,34 +191,31 @@ class YoloPredictor(BasePredictor, QObject):
                             im0 = None if self.source_type.tensor else im0s[i].copy()
                             if 'no detections' in s:
                                 self.im = im0
-                                
-                            if not isinstance(self.frames, list):
+
+                            if isinstance(self.frame, int) and (not isinstance(self.frames, list) and self.frames is not None):
                                 self.progress_value = int(self.frame/self.frames*1000)
-                                # 檢測完成動作
-                                if self.frame == self.frames:
-                                    for v in self.vid_writer.values():
-                                        if isinstance(v, cv2.VideoWriter):
-                                            v.release()
-                                    self.yolo2main_status_msg.emit('Detection completed!')
-                                    break
-                            elif self.source == 0 or self.source != '':
-                                self.frame = 1
-                                self.frames = 1
-                                self.progress_value = int(self.frame/self.frames*1000)
-     
-                            # 發送測試結果
-                            self.yolo2main_pre_img.emit(im0 if isinstance(im0, np.ndarray) else im0[0])   # 檢測前
-                            self.yolo2main_res_img.emit(self.im) # 檢測後
-                            # self.yolo2main_labels.emit(self.labels_dict)        # webcam 需要更改 def write_results
+                            elif not self.source or self.frames is None or self.frame is None:
+                                # self.frame = 0
+                                # self.frames = 1
+                                self.progress_value = int(1000)
+                            # Send test results
+                            self.yolo2main_pre_img.emit(im0 if isinstance(im0, np.ndarray) else im0[0])   # Before detection
+                            self.yolo2main_res_img.emit(self.im) # After detection
                             if self.task != 'Classify':
                                 self.yolo2main_class_num.emit(self.class_nums)
                                 self.yolo2main_target_num.emit(self.target_nums)
+                            if not isinstance(self.frames, list) and self.frames is not None:
                                 self.yolo2main_fps.emit(str(self.fps))
                             if self.speed_thres != 0:
-                                time.sleep(self.speed_thres/1000)   # 延遲，毫秒
-
-                        self.yolo2main_progress.emit(self.progress_value)   # 進度條
-                    # 終止檢測標誌檢測
+                                time.sleep(self.speed_thres/1000)   # Delay, milliseconds
+                        self.yolo2main_progress.emit(self.progress_value)   # Progress bar
+                    if (self.frame == self.frames) and self.frames is not None and self.frame is not None:
+                        for v in self.vid_writer.values():
+                            if isinstance(v, cv2.VideoWriter):
+                                v.release()
+                        self.yolo2main_status_msg.emit('Detection completed!')
+                        break
+                    # Terminate detection flag detection
                     if self.stop_dtc:
                         for v in self.vid_writer.values():
                             if isinstance(v, cv2.VideoWriter):
@@ -226,7 +229,8 @@ class YoloPredictor(BasePredictor, QObject):
                     if self.save_txt or self.save_txt_cam or self.args.save_crop:
                         nl = len(list(self.save_dir.glob("labels/*.txt")))  # number of labels
                         s = f"\n{nl} label{'s' * (nl > 1)} saved to {self.save_dir / 'labels'}" if (self.save_txt or self.save_txt_cam) else ""
-
+                if not self.source_type.stream and self.frames is None or self.frame is None:
+                    self.yolo2main_status_msg.emit('Detection completed!')
         except Exception as e:
             pass
             traceback.print_exc()
@@ -369,12 +373,12 @@ class YoloPredictor(BasePredictor, QObject):
 
         # Set the track preds
         preds = ops.non_max_suppression(preds,
-                                        self.conf_thres,
-                                        self.iou_thres,
-                                        agnostic=self.args.agnostic_nms,
-                                        max_det=self.args.max_det,
-                                        classes=self.args.classes,
-                                        nc=len(self.model.names))
+                                         self.conf_thres,
+                                         self.iou_thres,
+                                         agnostic=self.args.agnostic_nms,
+                                         max_det=self.args.max_det,
+                                         classes=self.args.classes,
+                                         nc=len(self.model.names))
 
         if not isinstance(orig_imgs,
                           list):  # input images are a torch.Tensor, not a list
@@ -494,7 +498,9 @@ class YoloPredictor(BasePredictor, QObject):
 
     def save_predicted_images(self, save_path="", frame=0):
         """Save video predictions as mp4 at specified path."""
+        # Save the image to be saved
         self.im = self.plotted_img
+        # If the task is tracking, draw the tracking points
         if self.task == 'Track':
             for points in self.track_pointlist:
                 cv2.polylines(self.im, [points],
@@ -505,23 +511,26 @@ class YoloPredictor(BasePredictor, QObject):
         if self.dataset.mode in {"stream", "video"}:
             self.fps = self.dataset.fps if self.dataset.mode == "video" else 30
             self.frames = self.dataset.frames
+            # Create a directory to store frames if it doesn't exist
             frames_path = f'{save_path.split(".", 1)[0]}_frames/'
-            if save_path not in self.vid_writer:  # new video
+            if save_path not in self.vid_writer and (self.save_res or self.save_res_cam):  # New video
                 if self.args.save_frames:
                     Path(frames_path).mkdir(parents=True, exist_ok=True)
                 suffix, fourcc = (".mp4", "avc1") if MACOS else (".avi", "WMV2") if WINDOWS else (".avi", "MJPG")
+                # Initialize a VideoWriter for the new video
                 self.vid_writer[save_path] = cv2.VideoWriter(
                     filename=str(Path(save_path).with_suffix(suffix)),
                     fourcc=cv2.VideoWriter_fourcc(*fourcc),
-                    fps=self.fps,  # integer required, floats produce error in MP4 codec
+                    fps=self.fps,
                     frameSize=(self.im.shape[1], self.im.shape[0]),  # (width, height)
                 )
-
-            # Save video
-            self.vid_writer[save_path].write(self.im)
+            # Write the frame to the video if it should be saved
+            if self.save_res or self.save_res_cam:
+                self.vid_writer[save_path].write(self.im)
+            # Save the frame as an image if requested
             if self.args.save_frames:
                 cv2.imwrite(f"{frames_path}{self.frame}.jpg", self.im)
 
         # Save images
-        if self.save_res:
+        if self.save_res or self.save_res_cam:
             cv2.imwrite(save_path, self.im)
