@@ -12,7 +12,7 @@
 - `pip install ultralytics==8.2.22`
 - `pip install pyside6`
 - `pip install chardet`
-- `conda install pytorch torchvision torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia`
+- `pip install torch==2.0.1 torchvision==0.15.2 torchaudio==2.0.2 --index-url https://download.pytorch.org/whl/cu118`
 - `python main.py or python main_en.py`
 
 #### !!The corresponding version of the library must be installed
