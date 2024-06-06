@@ -93,6 +93,7 @@ class YoloPredictor(BasePredictor, QObject):
         self.callbacks = _callbacks or callbacks.get_default_callbacks()
         self.txt_path = None
         self.frames = None
+        self.fps = None
         self._lock = threading.Lock()  # for automatic thread-safe inference
         callbacks.add_integration_callbacks(self)
 
@@ -109,7 +110,6 @@ class YoloPredictor(BasePredictor, QObject):
                     track_model = YOLO(self.new_model_name)
                 self.setup_model(self.new_model_name)
                 self.used_model_name = self.new_model_name
-
             with self._lock:  # for thread-safe inference
                 if self.task == 'Track':
                     track_history = defaultdict(lambda: [])
@@ -131,7 +131,10 @@ class YoloPredictor(BasePredictor, QObject):
                     ops.Profile(device=self.device),
                     ops.Profile(device=self.device),
                 )
-                for self.batch in self.dataset: 
+
+                batch = iter(self.dataset)
+                while True:
+                    # for self.batch in self.dataset: 
                     # 在中途更改模型
                     if self.used_model_name != self.new_model_name:  
                         # self.yolo2main_status_msg.emit('Change Model...')
@@ -139,12 +142,15 @@ class YoloPredictor(BasePredictor, QObject):
                             track_model = YOLO(self.used_model_name)
                         self.setup_model(self.new_model_name)
                         self.used_model_name = self.new_model_name
-                    
+
                     # 暫停開關
                     if self.continue_dtc:
-                        # time.sleep(0.001)
+                        try:
+                            batch = next(self.dataset)  # next data
+                        except StopIteration:
+                            break
+                        self.batch = batch
                         self.yolo2main_status_msg.emit('檢測中...')
-                        # batch = next(self.dataset)  # 獲取下一個數據
 
                         paths, im0s, s = self.batch
 
@@ -186,33 +192,29 @@ class YoloPredictor(BasePredictor, QObject):
                             if 'no detections' in s:
                                 self.im = im0
 
-                            if not isinstance(self.frames, list):
+                            if isinstance(self.frame, int) and (not isinstance(self.frames, list) and self.frames is not None):
                                 self.progress_value = int(self.frame/self.frames*1000)
-                                # 檢測完成動作
-                                if self.frame == self.frames:
-                                    for v in self.vid_writer.values():
-                                        if isinstance(v, cv2.VideoWriter):
-                                            v.release()
-                                    self.yolo2main_status_msg.emit('檢測完成')
-                                    break
-                            elif self.source == 0 or self.source != '':
-                                self.frame = 1
-                                self.frames = 1
-                                self.progress_value = int(self.frame/self.frames*1000)
-     
+                            elif not self.source or self.frames is None or self.frame is None:
+                                # self.frame = 0
+                                # self.frames = 1
+                                self.progress_value = int(1000)
                             # 發送測試結果
                             self.yolo2main_pre_img.emit(im0 if isinstance(im0, np.ndarray) else im0[0])   # 檢測前
                             self.yolo2main_res_img.emit(self.im) # 檢測後
-                            # self.yolo2main_labels.emit(self.labels_dict)        # webcam 需要更改 def write_results
                             if self.task != 'Classify':
                                 self.yolo2main_class_num.emit(self.class_nums)
                                 self.yolo2main_target_num.emit(self.target_nums)
+                            if not isinstance(self.frames, list) and self.frames is not None:
                                 self.yolo2main_fps.emit(str(self.fps))
                             if self.speed_thres != 0:
                                 time.sleep(self.speed_thres/1000)   # 延遲，毫秒
-
                         self.yolo2main_progress.emit(self.progress_value)   # 進度條
-
+                    if (self.frame == self.frames) and self.frames is not None and self.frame is not None:
+                        for v in self.vid_writer.values():
+                            if isinstance(v, cv2.VideoWriter):
+                                v.release()
+                        self.yolo2main_status_msg.emit('檢測完成')
+                        break
                     # 終止檢測標誌檢測
                     if self.stop_dtc:
                         for v in self.vid_writer.values():
@@ -227,7 +229,8 @@ class YoloPredictor(BasePredictor, QObject):
                     if self.save_txt or self.save_txt_cam or self.args.save_crop:
                         nl = len(list(self.save_dir.glob("labels/*.txt")))  # number of labels
                         s = f"\n{nl} label{'s' * (nl > 1)} saved to {self.save_dir / 'labels'}" if (self.save_txt or self.save_txt_cam) else ""
-
+                if not self.source_type.stream and self.frames is None or self.frame is None:
+                    self.yolo2main_status_msg.emit('檢測完成')
         except Exception as e:
             pass
             traceback.print_exc()
@@ -507,7 +510,7 @@ class YoloPredictor(BasePredictor, QObject):
             self.fps = self.dataset.fps if self.dataset.mode == "video" else 30
             self.frames = self.dataset.frames
             frames_path = f'{save_path.split(".", 1)[0]}_frames/'
-            if save_path not in self.vid_writer:  # new video
+            if save_path not in self.vid_writer and (self.save_res or self.save_res_cam):  # new video
                 if self.args.save_frames:
                     Path(frames_path).mkdir(parents=True, exist_ok=True)
                 suffix, fourcc = (".mp4", "avc1") if MACOS else (".avi", "WMV2") if WINDOWS else (".avi", "MJPG")
@@ -517,12 +520,12 @@ class YoloPredictor(BasePredictor, QObject):
                     fps=self.fps,  # integer required, floats produce error in MP4 codec
                     frameSize=(self.im.shape[1], self.im.shape[0]),  # (width, height)
                 )
-
-            # Save video
-            self.vid_writer[save_path].write(self.im)
+            if self.save_res or self.save_res_cam:
+                # Save video
+                self.vid_writer[save_path].write(self.im)
             if self.args.save_frames:
                 cv2.imwrite(f"{frames_path}{self.frame}.jpg", self.im)
 
         # Save images
-        if self.save_res:
+        if self.save_res or self.save_res_cam:
             cv2.imwrite(save_path, self.im)
