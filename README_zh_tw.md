@@ -1,4 +1,4 @@
-# YoloSide ~ A GUI For YOLOv8 `V2.2`
+# YoloSide ~ A GUI For YOLOv8 `V2.3`
 ---
 <p align="center"> 
   <a href="https://github.com/SuPoTing/YOLOv8-GUI-PySide6/blob/main/README.md"> English</a> &nbsp; | &nbsp; 繁體中文</a>
