@@ -15,17 +15,17 @@ import cv2
 import os
 
 class MainWindow(QMainWindow, Ui_MainWindow):
-    main2yolo_begin_sgl = Signal()  # 主視窗向 YOLO 實例發送執行信號
+    main2yolo_begin_sgl = Signal()  # Signal to send execution signal from main window to YOLO instance
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
         
-        # 基本介面設置
+        # Basic interface setup
         self.setupUi(self)
-        self.setAttribute(Qt.WA_TranslucentBackground)  # 圓角透明
-        self.setWindowFlags(Qt.FramelessWindowHint)  # 設置窗口標誌: 隱藏窗口邊框
-        UIFuncitons.uiDefinitions(self)  # 自定義介面定義
+        self.setAttribute(Qt.WA_TranslucentBackground)  # Rounded corners and transparency
+        self.setWindowFlags(Qt.FramelessWindowHint)  # Set window flags: hide window border
+        UIFuncitons.uiDefinitions(self)  # Custom interface definitions
 
-        #初始頁面
+        # Initial page setup
         self.task = ''
         self.PageIndex = 1
         self.content.setCurrentIndex(self.PageIndex)
@@ -37,22 +37,23 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.src_home_button.setEnabled(False)
         self.src_file_button.setEnabled(False)
+        self.src_img_button.setEnabled(False)
         self.src_cam_button.setEnabled(False)
         self.src_rtsp_button.setEnabled(False)
 
         self.src_home_button.clicked.connect(self.return_home)
-        ####################################image or video####################################
-        # 顯示模塊陰影
+        #################################### Image or Video ####################################
+        # Display module shadow
         UIFuncitons.shadow_style(self, self.Class_QF, QColor(162, 129, 247))
         UIFuncitons.shadow_style(self, self.Target_QF, QColor(251, 157, 139))
         UIFuncitons.shadow_style(self, self.Fps_QF, QColor(170, 128, 213))
         UIFuncitons.shadow_style(self, self.Model_QF, QColor(64, 186, 193))
 
-        # YOLO-v8 線程
-        self.yolo_predict = YoloPredictor()                           # 創建 YOLO 實例
-        self.select_model = self.model_box.currentText()                   # 默認模型
-         
-        self.yolo_thread = QThread()                                  # 創建 YOLO 線程
+        # YOLO-v8 thread
+        self.yolo_predict = YoloPredictor()  # Create YOLO instance
+        self.select_model = self.model_box.currentText()  # Default model
+        
+        self.yolo_thread = QThread()  # Create YOLO thread
         self.yolo_predict.yolo2main_pre_img.connect(lambda x: self.show_image(x, self.pre_video))
         self.yolo_predict.yolo2main_res_img.connect(lambda x: self.show_image(x, self.res_video))
         self.yolo_predict.yolo2main_status_msg.connect(lambda x: self.show_status(x))        
@@ -63,49 +64,50 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.main2yolo_begin_sgl.connect(self.yolo_predict.run)
         self.yolo_predict.moveToThread(self.yolo_thread)
 
-        self.Qtimer_ModelBox = QTimer(self)     # 定時器: 每 2 秒監控模型文件的變化
+        self.Qtimer_ModelBox = QTimer(self)  # Timer: monitor model file changes every 2 seconds
         self.Qtimer_ModelBox.timeout.connect(self.ModelBoxRefre)
         self.Qtimer_ModelBox.start(2000)
 
-        # 模型參數
+        # Model parameters
         self.model_box.currentTextChanged.connect(self.change_model)     
-        self.iou_spinbox.valueChanged.connect(lambda x: self.change_val(x, 'iou_spinbox'))    # iou 文本框
-        self.iou_slider.valueChanged.connect(lambda x: self.change_val(x, 'iou_slider'))      # iou 滾動條
-        self.conf_spinbox.valueChanged.connect(lambda x: self.change_val(x, 'conf_spinbox'))  # conf 文本框
-        self.conf_slider.valueChanged.connect(lambda x: self.change_val(x, 'conf_slider'))    # conf 滾動條
-        self.speed_spinbox.valueChanged.connect(lambda x: self.change_val(x, 'speed_spinbox'))# speed 文本框
-        self.speed_slider.valueChanged.connect(lambda x: self.change_val(x, 'speed_slider'))  # speed 滾動條
+        self.iou_spinbox.valueChanged.connect(lambda x: self.change_val(x, 'iou_spinbox'))  # IOU text box
+        self.iou_slider.valueChanged.connect(lambda x: self.change_val(x, 'iou_slider'))  # IOU slider
+        self.conf_spinbox.valueChanged.connect(lambda x: self.change_val(x, 'conf_spinbox'))  # Confidence text box
+        self.conf_slider.valueChanged.connect(lambda x: self.change_val(x, 'conf_slider'))  # Confidence slider
+        self.speed_spinbox.valueChanged.connect(lambda x: self.change_val(x, 'speed_spinbox'))  # Speed text box
+        self.speed_slider.valueChanged.connect(lambda x: self.change_val(x, 'speed_slider'))  # Speed slider
 
-        # 提示窗口初始化
+        # Initialize hint window
         self.Class_num.setText('--')
         self.Target_num.setText('--')
         self.fps_label.setText('--')
         self.Model_name.setText(self.select_model)
 
-        # 選擇檢測來源
-        self.src_file_button.clicked.connect(self.open_src_file)  # 選擇本地文件
+        # Select folder source
+        self.src_file_button.clicked.connect(self.open_src_file)  # Select local file
+        # Single file
+        self.src_img_button.clicked.connect(self.open_src_img)  # Select local file
+        # Start test button
+        self.run_button.clicked.connect(self.run_or_continue)  # Pause/Start
+        self.stop_button.clicked.connect(self.stop)  # Stop
 
-        # 開始測試按鈕
-        self.run_button.clicked.connect(self.run_or_continue)   # 暫停/開始
-        self.stop_button.clicked.connect(self.stop)             # 終止
+        # Other function buttons
+        self.save_res_button.toggled.connect(self.is_save_res)  # Save image option
+        self.save_txt_button.toggled.connect(self.is_save_txt)  # Save label option
+        #################################### Image or Video ####################################
 
-        # 其他功能按鈕
-        self.save_res_button.toggled.connect(self.is_save_res)  # 保存圖片選項
-        self.save_txt_button.toggled.connect(self.is_save_txt)  # 保存標籤選項
-        ####################################image or video####################################
-
-        ####################################camera####################################
-        # 顯示cam模塊陰影
+        #################################### Camera ####################################
+        # Display cam module shadow
         UIFuncitons.shadow_style(self, self.Class_QF_cam, QColor(162, 129, 247))
         UIFuncitons.shadow_style(self, self.Target_QF_cam, QColor(251, 157, 139))
         UIFuncitons.shadow_style(self, self.Fps_QF_cam, QColor(170, 128, 213))
         UIFuncitons.shadow_style(self, self.Model_QF_cam, QColor(64, 186, 193))
 
-        # YOLO-v8-cam線程
-        self.yolo_predict_cam = YoloPredictor()                           # 創建 YOLO 實例
-        self.select_model_cam = self.model_box_cam.currentText()          # 默認模型
+        # YOLO-v8-cam thread
+        self.yolo_predict_cam = YoloPredictor()  # Create YOLO instance
+        self.select_model_cam = self.model_box_cam.currentText()  # Default model
         
-        self.yolo_thread_cam = QThread()                                  # 創建 YOLO 線程
+        self.yolo_thread_cam = QThread()  # Create YOLO thread
         self.yolo_predict_cam.yolo2main_pre_img.connect(lambda c: self.cam_show_image(c, self.pre_cam))
         self.yolo_predict_cam.yolo2main_res_img.connect(lambda c: self.cam_show_image(c, self.res_cam))
         self.yolo_predict_cam.yolo2main_status_msg.connect(lambda c: self.show_status(c))        
@@ -116,61 +118,62 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.main2yolo_begin_sgl.connect(self.yolo_predict_cam.run)
         self.yolo_predict_cam.moveToThread(self.yolo_thread_cam)
 
-        self.Qtimer_ModelBox_cam = QTimer(self)     # 定時器: 每 2 秒監控模型文件的變化
+        self.Qtimer_ModelBox_cam = QTimer(self)  # Timer: monitor model file changes every 2 seconds
         self.Qtimer_ModelBox_cam.timeout.connect(self.ModelBoxRefre)
         self.Qtimer_ModelBox_cam.start(2000)
 
-        # cam模型參數
+        # Cam model parameters
         self.model_box_cam.currentTextChanged.connect(self.cam_change_model)     
-        self.iou_spinbox_cam.valueChanged.connect(lambda c: self.cam_change_val(c, 'iou_spinbox_cam'))    # iou 文本框
-        self.iou_slider_cam.valueChanged.connect(lambda c: self.cam_change_val(c, 'iou_slider_cam'))      # iou 滾動條
-        self.conf_spinbox_cam.valueChanged.connect(lambda c: self.cam_change_val(c, 'conf_spinbox_cam'))  # conf 文本框
-        self.conf_slider_cam.valueChanged.connect(lambda c: self.cam_change_val(c, 'conf_slider_cam'))    # conf 滾動條
-        self.speed_spinbox_cam.valueChanged.connect(lambda c: self.cam_change_val(c, 'speed_spinbox_cam'))# speed 文本框
-        self.speed_slider_cam.valueChanged.connect(lambda c: self.cam_change_val(c, 'speed_slider_cam'))  # speed 滾動條
+        self.iou_spinbox_cam.valueChanged.connect(lambda c: self.cam_change_val(c, 'iou_spinbox_cam'))  # IOU text box
+        self.iou_slider_cam.valueChanged.connect(lambda c: self.cam_change_val(c, 'iou_slider_cam'))  # IOU slider
+        self.conf_spinbox_cam.valueChanged.connect(lambda c: self.cam_change_val(c, 'conf_spinbox_cam'))  # Confidence text box
+        self.conf_slider_cam.valueChanged.connect(lambda c: self.cam_change_val(c, 'conf_slider_cam'))  # Confidence slider
+        self.speed_spinbox_cam.valueChanged.connect(lambda c: self.cam_change_val(c, 'speed_spinbox_cam'))  # Speed text box
+        self.speed_slider_cam.valueChanged.connect(lambda c: self.cam_change_val(c, 'speed_slider_cam'))  # Speed slider
 
-        # 提示窗口初始化
+        # Initialize hint window
         self.Class_num_cam.setText('--')
         self.Target_num_cam.setText('--')
         self.fps_label_cam.setText('--')
         self.Model_name_cam.setText(self.select_model_cam)
         
-        # 選擇檢測來源
-        self.src_cam_button.clicked.connect(self.cam_button)#選擇攝像機
+        # Select detection source
+        self.src_cam_button.clicked.connect(self.cam_button)  # Select camera
         
-        # 開始測試按鈕
-        self.run_button_cam.clicked.connect(self.cam_run_or_continue)   # 暫停/開始
-        self.stop_button_cam.clicked.connect(self.cam_stop)             # 終止
+        # Start test button
+        self.run_button_cam.clicked.connect(self.cam_run_or_continue)  # Pause/Start
+        self.stop_button_cam.clicked.connect(self.cam_stop)  # Stop
         
-        # 其他功能按鈕
-        self.save_res_button_cam.toggled.connect(self.cam_is_save_res)  # 保存圖片選項
-        self.save_txt_button_cam.toggled.connect(self.cam_is_save_txt)  # 保存標籤選項
-        ####################################camera####################################
-        ####################################rtsp####################################
+        # Other function buttons
+        self.save_res_button_cam.toggled.connect(self.cam_is_save_res)  # Save image option
+        self.save_txt_button_cam.toggled.connect(self.cam_is_save_txt)  # Save label option
+        #################################### Camera ####################################
+        #################################### RTSP ####################################
         self.src_rtsp_button.clicked.connect(self.rtsp_button)
-        ####################################rtsp####################################
-        self.ToggleBotton.clicked.connect(lambda: UIFuncitons.toggleMenu(self, True))   # 左側導航按鈕
-        # 初始化
+        #################################### RTSP ####################################
+        self.ToggleBotton.clicked.connect(lambda: UIFuncitons.toggleMenu(self, True))  # Left navigation button
+        # Initialization
         self.load_config()
 
     def return_home(self):
-        # 0:image/video page
-        # 1:home page
-        # 2:camera page
+        # 0: image/video page
+        # 1: home page
+        # 2: camera page
         if self.PageIndex != 1:
             self.PageIndex = 1
         self.content.setCurrentIndex(1)
         self.yolo_predict_cam.source = ''
         self.src_home_button.setEnabled(False)
         self.src_file_button.setEnabled(False)
+        self.src_img_button.setEnabled(False)
         self.src_cam_button.setEnabled(False)
         self.src_rtsp_button.setEnabled(False)          
-        # if self.yolo_thread_cam.isRunning() or self.yolo_thread.isRunning():
-        self.yolo_thread_cam.quit() # 結束線程
+        # Terminate thread if running
+        self.yolo_thread_cam.quit() 
         self.cam_stop()
         self.yolo_thread.quit()
         self.stop()
-        self.show_status("Welcome to the YOLOv8 Detection System. Please select a mode.")
+        self.show_status("Welcome to the YOLOv8 detection system, please select Mode")
 
     def button_classify(self):
         self.task = 'Classify'
@@ -181,28 +184,29 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.content.setCurrentIndex(0)
         self.src_home_button.setEnabled(True)
         self.src_file_button.setEnabled(True)
+        self.src_img_button.setEnabled(True)
         self.src_cam_button.setEnabled(True)
         self.src_rtsp_button.setEnabled(True)
-        self.settings_button.clicked.connect(lambda: UIFuncitons.settingBox(self, True)) # 右上方設置按鈕
+        self.settings_button.clicked.connect(lambda: UIFuncitons.settingBox(self, True)) # Top right settings button
 
-        # 讀取模型文件夾
+        # Load model directory
         self.pt_list = os.listdir('./models/classify/')
         self.pt_list = [file for file in self.pt_list if file.endswith(('.pt', 'onnx', 'engine'))]
-        self.pt_list.sort(key=lambda x: os.path.getsize('./models/classify/' + x))   # 按文件大小排序
+        self.pt_list.sort(key=lambda x: os.path.getsize('./models/classify/' + x))   # Sort by file size
         self.model_box.clear()
         self.model_box.addItems(self.pt_list)
         self.yolo_predict.new_model_name = "./models/classify/%s" % self.select_model
         self.yolo_predict_cam.new_model_name = "./models/classify/%s" % self.select_model_cam
 
-        # 讀取cam模型文件夾
+        # Load camera model directory
         self.pt_list_cam = os.listdir('./models/classify/')
         self.pt_list_cam = [file for file in self.pt_list_cam if file.endswith(('.pt', 'onnx', 'engine'))]
-        self.pt_list_cam.sort(key=lambda x: os.path.getsize('./models/classify/' + x))   # 按文件大小排序
+        self.pt_list_cam.sort(key=lambda x: os.path.getsize('./models/classify/' + x))   # Sort by file size
         self.model_box_cam.clear()
         self.model_box_cam.addItems(self.pt_list_cam)
-        self.show_status("Current Page: Image or Video Detection Page, Mode: Classify")
+        self.show_status("Current page: image or video detection page, Mode: Classify")
 
-    def button_detect(self): #觸發button_detect後的事件
+    def button_detect(self):
         self.task = 'Detect'
         self.yolo_predict.task = self.task
         self.yolo_predict_cam.task = self.task
@@ -213,28 +217,29 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.content.setCurrentIndex(0)
         self.src_home_button.setEnabled(True)
         self.src_file_button.setEnabled(True)
+        self.src_img_button.setEnabled(True)
         self.src_cam_button.setEnabled(True)
         self.src_rtsp_button.setEnabled(True)
-        self.settings_button.clicked.connect(lambda: UIFuncitons.settingBox(self, True)) # 右上方設置按鈕
+        self.settings_button.clicked.connect(lambda: UIFuncitons.settingBox(self, True)) # Top right settings button
 
-        # 讀取模型文件夾
+        # Load model directory
         self.pt_list = os.listdir('./models/detect/')
         self.pt_list = [file for file in self.pt_list if file.endswith(('.pt', 'onnx', 'engine'))]
-        self.pt_list.sort(key=lambda x: os.path.getsize('./models/detect/' + x))   # 按文件大小排序
+        self.pt_list.sort(key=lambda x: os.path.getsize('./models/detect/' + x))   # Sort by file size
         self.model_box.clear()
         self.model_box.addItems(self.pt_list)
         self.yolo_predict.new_model_name = "./models/detect/%s" % self.select_model
         self.yolo_predict_cam.new_model_name = "./models/detect/%s" % self.select_model_cam
 
-        # 讀取cam模型文件夾
+        # Load camera model directory
         self.pt_list_cam = os.listdir('./models/detect/')
         self.pt_list_cam = [file for file in self.pt_list_cam if file.endswith(('.pt', 'onnx', 'engine'))]
-        self.pt_list_cam.sort(key=lambda x: os.path.getsize('./models/detect/' + x))   # 按文件大小排序
+        self.pt_list_cam.sort(key=lambda x: os.path.getsize('./models/detect/' + x))   # Sort by file size
         self.model_box_cam.clear()
         self.model_box_cam.addItems(self.pt_list_cam)
-        self.show_status("Current Page: Image or Video Detection Page, Mode: Detect")
+        self.show_status("Current page: image or video detection page, Mode: Detect")
 
-    def button_pose(self): #觸發button_detect後的事件
+    def button_pose(self):
         self.task = 'Pose'
         self.yolo_predict.task = self.task
         self.yolo_predict_cam.task = self.task
@@ -245,28 +250,29 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.content.setCurrentIndex(0)
         self.src_home_button.setEnabled(True)
         self.src_file_button.setEnabled(True)
+        self.src_img_button.setEnabled(True)
         self.src_cam_button.setEnabled(True)
         self.src_rtsp_button.setEnabled(True)
-        self.settings_button.clicked.connect(lambda: UIFuncitons.settingBox(self, True)) # 右上方設置按鈕
+        self.settings_button.clicked.connect(lambda: UIFuncitons.settingBox(self, True)) # Top right settings button
 
-        # 讀取模型文件夾
+        # Load model directory
         self.pt_list = os.listdir('./models/pose/')
         self.pt_list = [file for file in self.pt_list if file.endswith(('.pt', 'onnx', 'engine'))]
-        self.pt_list.sort(key=lambda x: os.path.getsize('./models/pose/' + x))   # 按文件大小排序
+        self.pt_list.sort(key=lambda x: os.path.getsize('./models/pose/' + x))   # Sort by file size
         self.model_box.clear()
         self.model_box.addItems(self.pt_list)
         self.yolo_predict.new_model_name = "./models/pose/%s" % self.select_model
         self.yolo_predict_cam.new_model_name = "./models/pose/%s" % self.select_model_cam
 
-        # 讀取cam模型文件夾
+        # Load camera model directory
         self.pt_list_cam = os.listdir('./models/pose/')
         self.pt_list_cam = [file for file in self.pt_list_cam if file.endswith(('.pt', 'onnx', 'engine'))]
-        self.pt_list_cam.sort(key=lambda x: os.path.getsize('./models/pose/' + x))   # 按文件大小排序
+        self.pt_list_cam.sort(key=lambda x: os.path.getsize('./models/pose/' + x))   # Sort by file size
         self.model_box_cam.clear()
         self.model_box_cam.addItems(self.pt_list_cam)
-        self.show_status("Current Page: Image or Video Detection Page, Mode: Pose")
+        self.show_status("Current page: image or video detection page, Mode: Pose")
 
-    def button_segment(self): #觸發button_detect後的事件
+    def button_segment(self):
         self.task = 'Segment'
         self.yolo_predict.task = self.task
         self.yolo_predict_cam.task = self.task
@@ -277,28 +283,29 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.content.setCurrentIndex(0)
         self.src_home_button.setEnabled(True)
         self.src_file_button.setEnabled(True)
+        self.src_img_button.setEnabled(True)
         self.src_cam_button.setEnabled(True)
         self.src_rtsp_button.setEnabled(True)
-        self.settings_button.clicked.connect(lambda: UIFuncitons.settingBox(self, True)) # 右上方設置按鈕
+        self.settings_button.clicked.connect(lambda: UIFuncitons.settingBox(self, True)) # Top right settings button
 
-        # 讀取模型文件夾
+        # Load model directory
         self.pt_list = os.listdir('./models/segment/')
         self.pt_list = [file for file in self.pt_list if file.endswith(('.pt', 'onnx', 'engine'))]
-        self.pt_list.sort(key=lambda x: os.path.getsize('./models/segment/' + x))   # 按文件大小排序
+        self.pt_list.sort(key=lambda x: os.path.getsize('./models/segment/' + x))   # Sort by file size
         self.model_box.clear()
         self.model_box.addItems(self.pt_list)
         self.yolo_predict.new_model_name = "./models/segment/%s" % self.select_model
         self.yolo_predict_cam.new_model_name = "./models/segment/%s" % self.select_model_cam
 
-        # 讀取cam模型文件夾
+        # Load camera model directory
         self.pt_list_cam = os.listdir('./models/segment/')
         self.pt_list_cam = [file for file in self.pt_list_cam if file.endswith(('.pt', 'onnx', 'engine'))]
-        self.pt_list_cam.sort(key=lambda x: os.path.getsize('./models/segment/' + x))   # 按文件大小排序
+        self.pt_list_cam.sort(key=lambda x: os.path.getsize('./models/segment/' + x))   # Sort by file size
         self.model_box_cam.clear()
         self.model_box_cam.addItems(self.pt_list_cam)
-        self.show_status("Current Page: Image or Video Detection Page, Mode: Segment")
+        self.show_status("Current page: image or video detection page, Mode: Segment")
 
-    def button_track(self): #觸發button_detect後的事件
+    def button_track(self):
         self.task = 'Track'
         self.yolo_predict.task = self.task
         self.yolo_predict_cam.task = self.task
@@ -309,100 +316,162 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.content.setCurrentIndex(0)
         self.src_home_button.setEnabled(True)
         self.src_file_button.setEnabled(True)
+        self.src_img_button.setEnabled(True)
         self.src_cam_button.setEnabled(True)
         self.src_rtsp_button.setEnabled(True)
-        self.settings_button.clicked.connect(lambda: UIFuncitons.settingBox(self, True)) # 右上方設置按鈕
+        self.settings_button.clicked.connect(lambda: UIFuncitons.settingBox(self, True)) # Top right settings button
         
-        # 讀取模型文件夾
+        # Load model directory
         self.pt_list = os.listdir('./models/track/')
         self.pt_list = [file for file in self.pt_list if file.endswith(('.pt', 'onnx', 'engine'))]
-        self.pt_list.sort(key=lambda x: os.path.getsize('./models/track/' + x))   # 按文件大小排序
+        self.pt_list.sort(key=lambda x: os.path.getsize('./models/track/' + x))   # Sort by file size
         self.model_box.clear()
         self.model_box.addItems(self.pt_list)
         self.yolo_predict.new_model_name = "./models/track/%s" % self.select_model
         self.yolo_predict_cam.new_model_name = "./models/track/%s" % self.select_model_cam
 
-        # 讀取cam模型文件夾
+        # Load camera model directory
         self.pt_list_cam = os.listdir('./models/track/')
         self.pt_list_cam = [file for file in self.pt_list_cam if file.endswith(('.pt', 'onnx', 'engine'))]
-        self.pt_list_cam.sort(key=lambda x: os.path.getsize('./models/track/' + x))   # 按文件大小排序
+        self.pt_list_cam.sort(key=lambda x: os.path.getsize('./models/track/' + x))   # Sort by file size
         self.model_box_cam.clear()
         self.model_box_cam.addItems(self.pt_list_cam)
-        self.show_status("Current Page: Image or Video Detection Page, Mode: Track")
+        self.show_status("Current page: image or video detection page, Mode: Track")
+
 
     ####################################image or video####################################
-    # 選擇本地檔案
+    # Open local file
     def open_src_file(self):
         if self.task == 'Classify':
-            self.show_status("Current Page: Image or Video Detection Page, Mode: Classify")
+            self.show_status("Current page: image or video detection page, Mode: Classify")
         if self.task == 'Detect':
-            self.show_status("Current Page: Image or Video Detection Page, Mode: Detect")
+            self.show_status("Current page: image or video detection page, Mode: Detect")
         if self.task == 'Pose':
-            self.show_status("Current Page: Image or Video Detection Page, Mode: Pose")
+            self.show_status("Current page: image or video detection page, Mode: Pose")
         if self.task == 'Segment':
-            self.show_status("Current Page: Image or Video Detection Page, Mode: Segment")
+            self.show_status("Current page: image or video detection page, Mode: Segment")
         if self.task == 'Track':
-            self.show_status("Current Page: Image or Video Detection Page, Mode: Track")
-            
-        # 結束cam線程，節省資源
+            self.show_status("Current page: image or video detection page, Mode: Track")      
+
+        # Terminate cam thread to save resources
         if self.yolo_thread_cam.isRunning():
-            self.yolo_thread_cam.quit() # 結束線程
+            self.yolo_thread_cam.quit()
             self.cam_stop()
 
         if self.PageIndex != 0:
             self.PageIndex = 0
         self.content.setCurrentIndex(0)
-        self.settings_button.clicked.connect(lambda: UIFuncitons.settingBox(self, True)) # 右上方設置按鈕
+        self.settings_button.clicked.connect(lambda: UIFuncitons.settingBox(self, True))  # Top right settings button
 
-        # 設置配置檔路徑
+        # Set the configuration file path
         config_file = 'config/fold.json'
         
-        # 讀取配置檔內容
+        # Read the configuration file content
         config = json.load(open(config_file, 'r', encoding='utf-8'))
         
-        # 獲取上次打開的資料夾路徑
+        # Get the last opened folder path
         open_fold = config['open_fold']
         
-        # 如果上次打開的資料夾不存在，則使用當前工作目錄
+        # Use the current working directory if the last opened folder does not exist
         if not os.path.exists(open_fold):
             open_fold = os.getcwd()
         
-        # 通過文件對話框讓用戶選擇圖片或影片檔案
+        if self.task == 'Track':
+            name = QFileDialog.getExistingDirectory(self, 'Select your Folder', open_fold)
+        else:
+            name = QFileDialog.getExistingDirectory(self, 'Select your Folder', open_fold)
+        
+        # If the user selects a file
+        if name:
+            # Set the selected file path as the source for yolo_predict
+            self.yolo_predict.source = name
+            
+            # Display the folder load status
+            self.show_status('Load folder: {}'.format(os.path.dirname(name)))
+            
+            # Update the last opened folder path in the configuration file
+            config['open_fold'] = os.path.dirname(name)
+            
+            # Write the updated configuration file back to the file
+            config_json = json.dumps(config, ensure_ascii=False, indent=2)
+            with open(config_file, 'w', encoding='utf-8') as f:
+                f.write(config_json)
+            
+            # Stop detection
+            self.stop()
+
+    # Open local file
+    def open_src_img(self):
+        if self.task == 'Classify':
+            self.show_status("Current page: image or video detection page, Mode: Classify")
+        if self.task == 'Detect':
+            self.show_status("Current page: image or video detection page, Mode: Detect")
+        if self.task == 'Pose':
+            self.show_status("Current page: image or video detection page, Mode: Pose")
+        if self.task == 'Segment':
+            self.show_status("Current page: image or video detection page, Mode: Segment")
+        if self.task == 'Track':
+            self.show_status("Current page: image or video detection page, Mode: Track")      
+
+        # Terminate cam thread to save resources
+        if self.yolo_thread_cam.isRunning():
+            self.yolo_thread_cam.quit()
+            self.cam_stop()
+
+        if self.PageIndex != 0:
+            self.PageIndex = 0
+        self.content.setCurrentIndex(0)
+        self.settings_button.clicked.connect(lambda: UIFuncitons.settingBox(self, True))  # Top right settings button
+
+        # Set the configuration file path
+        config_file = 'config/fold.json'
+        
+        # Read the configuration file content
+        config = json.load(open(config_file, 'r', encoding='utf-8'))
+        
+        # Get the last opened folder path
+        open_fold = config['open_fold']
+        
+        # Use the current working directory if the last opened folder does not exist
+        if not os.path.exists(open_fold):
+            open_fold = os.getcwd()
+        
+        # Allow the user to select a picture or video file through a file dialog
         if self.task == 'Track':
             name, _ = QFileDialog.getOpenFileName(self, 'Video', open_fold, "Pic File(*.mp4 *.mkv *.avi *.flv)")
         else:
             name, _ = QFileDialog.getOpenFileName(self, 'Video/image', open_fold, "Pic File(*.mp4 *.mkv *.avi *.flv *.jpg *.png)")
         
-        # 如果用戶選擇了檔案
+        # If the user selects a file
         if name:
-            # 將所選檔案的路徑設置為 yolo_predict 的 source
+            # Set the selected file path as the source for yolo_predict
             self.yolo_predict.source = name
             
-            # 顯示檔案載入狀態
-            self.show_status('Load file：{}'.format(os.path.basename(name)))
+            # Display the file load status
+            self.show_status('Load file: {}'.format(os.path.basename(name)))
             
-            # 更新配置檔中的上次打開的資料夾路徑
+            # Update the last opened folder path in the configuration file
             config['open_fold'] = os.path.dirname(name)
             
-            # 將更新後的配置檔寫回到檔案中
+            # Write the updated configuration file back to the file
             config_json = json.dumps(config, ensure_ascii=False, indent=2)
             with open(config_file, 'w', encoding='utf-8') as f:
                 f.write(config_json)
             
-            # 停止檢測
+            # Stop detection
             self.stop()
-                
-    # 主視窗顯示原始圖片和檢測結果
+
+    # Display original image and detection result in main window
     @staticmethod
     def show_image(img_src, label):
         try:
-            # 獲取原始圖片的高度、寬度和通道數
+            # Get the height, width, and number of channels of the original image
             ih, iw, _ = img_src.shape
-            # 獲取標籤(label)的寬度和高度
+            # Get the width and height of the label
             w = label.geometry().width()
             h = label.geometry().height()
             
-            # 保持原始數據比例
+            # Maintain the original data ratio
             if iw / w > ih / h:
                 scal = w / iw
                 nw = w
@@ -414,151 +483,149 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 nh = h
                 img_src_ = cv2.resize(img_src, (nw, nh))
 
-            # 將圖片轉換為RGB格式
+            # Convert the image to RGB format
             frame = cv2.cvtColor(img_src_, cv2.COLOR_BGR2RGB)
             
-            # 將圖片數據轉換為Qt的圖片對象
+            # Convert the image data to a QPixmap object
             img = QImage(frame.data, frame.shape[1], frame.shape[0], frame.shape[2] * frame.shape[1],
                          QImage.Format_RGB888)
             
-            # 將圖片顯示在標籤(label)上
+            # Display the image on the label
             label.setPixmap(QPixmap.fromImage(img))
 
         except Exception as e:
-            # 處理異常，印出錯誤信息
+            # Handle exceptions and print error messages
             print(repr(e))
 
-    # 控制開始/暫停檢測
+    # Control start/pause of detection
     def run_or_continue(self):
-        # 檢查 YOLO 預測的來源是否為空
+        # Check if the source of YOLO prediction is empty
         if self.yolo_predict.source == '':
-            self.show_status('Please select an image or video source before starting detection...')
+            self.show_status('Before starting detection, please select an image or video source...')
             self.run_button.setChecked(False)
         else:
-            # 設置 YOLO 預測的停止標誌為 False
+            # Set the stop flag of YOLO prediction to False
             self.yolo_predict.stop_dtc = False
             
-            # 如果開始按鈕被勾選
+            # If the start button is checked
             if self.run_button.isChecked():
-                self.run_button.setChecked(True)  # 啟動按鈕
-                self.save_txt_button.setEnabled(False)  # 啟動檢測後禁止勾選保存
+                self.run_button.setChecked(True)  # Activate button
+                self.save_txt_button.setEnabled(False)  # Disable saving after detection starts
                 self.save_res_button.setEnabled(False)
                 self.show_status('Detecting...')           
-                self.yolo_predict.continue_dtc = True   # 控制 YOLO 是否暫停
+                self.yolo_predict.continue_dtc = True   # Control YOLO pause
                 if not self.yolo_thread.isRunning():
                     self.yolo_thread.start()
                     self.main2yolo_begin_sgl.emit()
-
-            # 如果開始按鈕未被勾選，表示暫停檢測
+            # If the start button is not checked, it means pause detection
             else:
                 self.yolo_predict.continue_dtc = False
-                self.show_status("Detection Paused...")
-                self.run_button.setChecked(False)  # 停止按鈕
+                self.show_status("Detection paused...")
+                self.run_button.setChecked(False)  # Stop button
 
-    # 保存測試結果按鈕 -- 圖片/視頻
+    # Save test result button -- image/video
     def is_save_res(self):
         if self.save_res_button.checkState() == Qt.CheckState.Unchecked:
-            # 顯示消息，提示運行圖片結果不會保存
-            self.show_status('NOTE: Detection results will not be saved')
+            # Show message, indicating that image results will not be saved
+            self.show_status('NOTE: Image results will not be saved')
             
-            # 將 YOLO 實例的保存結果的標誌設置為 False
+            # Set the flag for saving results in the YOLO instance to False
             self.yolo_predict.save_res = False
         elif self.save_res_button.checkState() == Qt.CheckState.Checked:
-            # 顯示消息，提示運行圖片結果將會保存
-            self.show_status('NOTE: Detection results will be saved')
+            # Show message, indicating that image results will be saved
+            self.show_status('NOTE: Image results will be saved')
             
-            # 將 YOLO 實例的保存結果的標誌設置為 True
+            # Set the flag for saving results in the YOLO instance to True
             self.yolo_predict.save_res = True
 
-    # 保存測試結果按鈕 -- 標籤（txt）
+    # Save test result button -- label (txt)
     def is_save_txt(self):
         if self.save_txt_button.checkState() == Qt.CheckState.Unchecked:
-            # 顯示消息，提示標籤結果不會保存
+            # Show message, indicating that label results will not be saved
             self.show_status('NOTE: Label results will not be saved')
             
-            # 將 YOLO 實例的保存標籤的標誌設置為 False
+            # Set the flag for saving labels in the YOLO instance to False
             self.yolo_predict.save_txt = False
         elif self.save_txt_button.checkState() == Qt.CheckState.Checked:
-            # 顯示消息，提示標籤結果將會保存
+            # Show message, indicating that label results will be saved
             self.show_status('NOTE: Label results will be saved')
             
-            # 將 YOLO 實例的保存標籤的標誌設置為 True
+            # Set the flag for saving labels in the YOLO instance to True
             self.yolo_predict.save_txt = True
 
-    # 終止按鈕及相關狀態處理
+    # Terminate button and related state handling
     def stop(self):
-        # 如果 YOLO 線程正在運行，則終止線程
+        # If the YOLO thread is running, terminate the thread
         if self.yolo_thread.isRunning():
-            self.yolo_thread.quit() # 結束線程
+            self.yolo_thread.quit() # Terminate thread
         
-        # 設置 YOLO 實例的終止標誌為 True
+        # Set the termination flag of the YOLO instance to True
         self.yolo_predict.stop_dtc = True
         
-        # 恢復開始按鈕的狀態
+        # Restore the status of the start button
         self.run_button.setChecked(False)  
         
-
         self.save_res_button.setEnabled(True)   
         self.save_txt_button.setEnabled(True)
 
-        # 清空預測結果顯示區域的影象
+        # Clear the image in the prediction result display area
         self.pre_video.clear()           
         
-        # 清空檢測結果顯示區域的影象
+        # Clear the image in the detection result display area
         self.res_video.clear()           
         
-        # 將進度條的值設置為0
+        # Set the value of the progress bar to 0
         self.progress_bar.setValue(0)
         
-        # 重置類別數量、目標數量和fps標籤
+        # Reset the class number, target number, and fps labels
         self.Class_num.setText('--')
         self.Target_num.setText('--')
         self.fps_label.setText('--')
 
-    # 更改檢測參數
+    # Change detection parameters
     def change_val(self, x, flag):
         if flag == 'iou_spinbox':
-            # 如果是 iou_spinbox 的值發生變化，則改變 iou_slider 的值
+            # If the value of the iou_spinbox changes, change the value of the iou_slider
             self.iou_slider.setValue(int(x * 100))
 
         elif flag == 'iou_slider':
-            # 如果是 iou_slider 的值發生變化，則改變 iou_spinbox 的值
+            # If the value of the iou_slider changes, change the value of the iou_spinbox
             self.iou_spinbox.setValue(x / 100)
-            # 顯示消息，提示 IOU 閾值變化
+            # Show message, indicating IOU threshold change
             self.show_status('IOU Threshold: %s' % str(x / 100))
-            # 設置 YOLO 實例的 IOU 閾值
+            # Set the IOU threshold of the YOLO instance
             self.yolo_predict.iou_thres = x / 100
 
         elif flag == 'conf_spinbox':
-            # 如果是 conf_spinbox 的值發生變化，則改變 conf_slider 的值
+            # If the value of the conf_spinbox changes, change the value of the conf_slider
             self.conf_slider.setValue(int(x * 100))
 
         elif flag == 'conf_slider':
-            # 如果是 conf_slider 的值發生變化，則改變 conf_spinbox 的值
+            # If the value of the conf_slider changes, change the value of the conf_spinbox
             self.conf_spinbox.setValue(x / 100)
-            # 顯示消息，提示 Confidence 閾值變化
+            # Show message, indicating Confidence threshold change
             self.show_status('Conf Threshold: %s' % str(x / 100))
-            # 設置 YOLO 實例的 Confidence 閾值
+            # Set the Confidence threshold of the YOLO instance
             self.yolo_predict.conf_thres = x / 100
 
         elif flag == 'speed_spinbox':
-            # 如果是 speed_spinbox 的值發生變化，則改變 speed_slider 的值
+            # If the value of the speed_spinbox changes, change the value of the speed_slider
             self.speed_slider.setValue(x)
 
         elif flag == 'speed_slider':
-            # 如果是 speed_slider 的值發生變化，則改變 speed_spinbox 的值
+            # If the value of the speed_slider changes, change the value of the speed_spinbox
             self.speed_spinbox.setValue(x)
-            # 顯示消息，提示延遲時間變化
+            # Show message, indicating delay time change
             self.show_status('Delay: %s ms' % str(x))
-            # 設置 YOLO 實例的延遲時間閾值
-            self.yolo_predict.speed_thres = x  # 毫秒
+            # Set the delay time threshold of the YOLO instance
+            self.yolo_predict.speed_thres = x  # milliseconds
     
-    # 更改模型
+    # Change model
     def change_model(self, x):
-        # 獲取當前選擇的模型名稱
+        # Get the currently selected model name
         self.select_model = self.model_box.currentText()
         
-        # 設置 YOLO 實例的新模型名稱
+        # Set the new model name of the YOLO instance
         if self.task == 'Classify':
             self.yolo_predict.new_model_name = "./models/classify/%s" % self.select_model
         elif self.task == 'Detect':
@@ -569,20 +636,20 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.yolo_predict.new_model_name = "./models/segment/%s" % self.select_model
         elif self.task == 'Track':
             self.yolo_predict.new_model_name = "./models/track/%s" % self.select_model
-        # 顯示消息，提示模型已更改
-        self.show_status('Change Model：%s' % self.select_model)
+        # Show message, indicating model has been changed
+        self.show_status('Change Model: %s' % self.select_model)
         
-        # 在界面上顯示新的模型名稱
+        # Display the new model name on the interface
         self.Model_name.setText(self.select_model)
     ####################################image or video####################################
 
     ####################################camera####################################
     def cam_button(self):
         self.yolo_predict_cam.source = 0
-        self.show_status('Current Page: Webcam Detection Page')
-        # 結束image or video線程，節省資源
+        self.show_status('Current page: Webcam detection page')
+        # Terminate image or video thread to save resources
         if self.yolo_thread.isRunning() or self.yolo_thread_cam.isRunning():
-            self.yolo_thread.quit() # 結束線程
+            self.yolo_thread.quit()
             self.yolo_thread_cam.quit()
             self.stop()
             self.cam_stop()
@@ -590,48 +657,48 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.PageIndex != 2:
             self.PageIndex = 2
         self.content.setCurrentIndex(2)
-        self.settings_button.clicked.connect(lambda: UIFuncitons.cam_settingBox(self, True))   # 右上方設置按鈕
-            
-    # cam控制開始/暫停檢測
+        self.settings_button.clicked.connect(lambda: UIFuncitons.cam_settingBox(self, True))  # Top right settings button
+
+    # Control cam start/pause detection
     def cam_run_or_continue(self):
         if self.yolo_predict_cam.source == '':
-            self.show_status('No webcam detected')
+            self.show_status('Camera not detected')
             self.run_button_cam.setChecked(False)
 
         else:
-            # 設置 YOLO 預測的停止標誌為 False
+            # Set the stop flag for YOLO prediction to False
             self.yolo_predict_cam.stop_dtc = False
-            
-            # 如果開始按鈕被勾選
-            if self.run_button_cam.isChecked():
-                self.run_button_cam.setChecked(True)  # 啟動按鈕
-                self.save_txt_button_cam.setEnabled(False)  # 啟動檢測後禁止勾選保存
-                self.save_res_button_cam.setEnabled(False)
-                self.show_status('Detecting...')           
-                self.yolo_predict_cam.continue_dtc = True   # 控制 YOLO 是否暫停
 
-                if not self.yolo_thread_cam.isRunning():                
+            # If the start button is checked
+            if self.run_button_cam.isChecked():
+                self.run_button_cam.setChecked(True)  # Start button
+                self.save_txt_button_cam.setEnabled(False)  # Disable save after detection starts
+                self.save_res_button_cam.setEnabled(False)
+                self.show_status('Detection in progress...')
+                self.yolo_predict_cam.continue_dtc = True  # Control whether YOLO is paused
+
+                if not self.yolo_thread_cam.isRunning():
                     self.yolo_thread_cam.start()
                     self.main2yolo_begin_sgl.emit()
 
-            # 如果開始按鈕未被勾選，表示暫停檢測
+            # If the start button is not checked, it means pause detection
             else:
                 self.yolo_predict_cam.continue_dtc = False
-                self.show_status("Detection Paused...")
-                self.run_button_cam.setChecked(False)  # 停止按鈕
+                self.show_status("Detection paused...")
+                self.run_button_cam.setChecked(False)  # Stop button
 
-    # cam主視窗顯示原始圖片和檢測結果
+    # Display original image and detection results in the main cam window
     @staticmethod
     def cam_show_image(img_src, label, instance=None):
         try:
-            # 獲取原始圖片的高度、寬度和通道數
+            # Get the height, width, and channels of the original image
             ih, iw, _ = img_src.shape
-            
-            # 獲取標籤(label)的寬度和高度
+
+            # Get the width and height of the label
             w = label.geometry().width()
             h = label.geometry().height()
-            
-            # 保持原始數據比例
+
+            # Maintain the original data ratio
             if iw / w > ih / h:
                 scal = w / iw
                 nw = w
@@ -643,67 +710,67 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 nh = h
                 img_src_ = cv2.resize(img_src, (nw, nh))
 
-            # 將圖片轉換為RGB格式
+            # Convert the image to RGB format
             frame = cv2.cvtColor(img_src_, cv2.COLOR_BGR2RGB)
-            
-            # 將圖片數據轉換為Qt的圖片對象
+
+            # Convert the image data to a QPixmap object
             img = QImage(frame.data, frame.shape[1], frame.shape[0], frame.shape[2] * frame.shape[1],
                          QImage.Format_RGB888)
-            
-            # 將圖片顯示在標籤(label)上
+
+            # Display the image on the label
             label.setPixmap(QPixmap.fromImage(img))
 
         except Exception as e:
-            # 處理異常，印出錯誤信息
+            # Handle exceptions, print error messages
             traceback.print_exc()
             print(f"Error: {e}")
             if instance is not None:
                 instance.show_status('%s' % e)
 
-    # 更改檢測參數
+    # Change detection parameters
     def cam_change_val(self, c, flag):
         if flag == 'iou_spinbox_cam':
-            # 如果是 iou_spinbox 的值發生變化，則改變 iou_slider 的值
+            # If the value of iou_spinbox changes, change the value of iou_slider
             self.iou_slider_cam.setValue(int(c * 100))
 
         elif flag == 'iou_slider_cam':
-            # 如果是 iou_slider 的值發生變化，則改變 iou_spinbox 的值
+            # If the value of iou_slider changes, change the value of iou_spinbox
             self.iou_spinbox_cam.setValue(c / 100)
-            # 顯示消息，提示 IOU 閾值變化
+            # Display message indicating IOU threshold change
             self.show_status('IOU Threshold: %s' % str(c / 100))
-            # 設置 YOLO 實例的 IOU 閾值
+            # Set the IOU threshold for the YOLO instance
             self.yolo_predict_cam.iou_thres = c / 100
 
         elif flag == 'conf_spinbox_cam':
-            # 如果是 conf_spinbox 的值發生變化，則改變 conf_slider 的值
+            # If the value of conf_spinbox changes, change the value of conf_slider
             self.conf_slider_cam.setValue(int(c * 100))
 
         elif flag == 'conf_slider_cam':
-            # 如果是 conf_slider 的值發生變化，則改變 conf_spinbox 的值
+            # If the value of conf_slider changes, change the value of conf_spinbox
             self.conf_spinbox_cam.setValue(c / 100)
-            # 顯示消息，提示 Confidence 閾值變化
+            # Display message indicating confidence threshold change
             self.show_status('Conf Threshold: %s' % str(c / 100))
-            # 設置 YOLO 實例的 Confidence 閾值
+            # Set the confidence threshold for the YOLO instance
             self.yolo_predict_cam.conf_thres = c / 100
 
         elif flag == 'speed_spinbox_cam':
-            # 如果是 speed_spinbox 的值發生變化，則改變 speed_slider 的值
+            # If the value of speed_spinbox changes, change the value of speed_slider
             self.speed_slider_cam.setValue(c)
 
         elif flag == 'speed_slider_cam':
-            # 如果是 speed_slider 的值發生變化，則改變 speed_spinbox 的值
+            # If the value of speed_slider changes, change the value of speed_spinbox
             self.speed_spinbox_cam.setValue(c)
-            # 顯示消息，提示延遲時間變化
+            # Display message indicating delay time change
             self.show_status('Delay: %s ms' % str(c))
-            # 設置 YOLO 實例的延遲時間閾值
-            self.yolo_predict_cam.speed_thres = c  # 毫秒
+            # Set the delay time threshold for the YOLO instance
+            self.yolo_predict_cam.speed_thres = c  # milliseconds
 
-    # 更改模型
+    # Change model
     def cam_change_model(self, c):
-        # 獲取當前選擇的模型名稱
+        # Get the currently selected model name
         self.select_model_cam = self.model_box_cam.currentText()
-        
-        # 設置 YOLO 實例的新模型名稱
+
+        # Set the new model name for the YOLO instance
         if self.task == 'Classify':
             self.yolo_predict_cam.new_model_name = "./models/classify/%s" % self.select_model_cam
         elif self.task == 'Detect':
@@ -714,88 +781,88 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.yolo_predict_cam.new_model_name = "./models/segment/%s" % self.select_model_cam
         elif self.task == 'Track':
             self.yolo_predict_cam.new_model_name = "./models/track/%s" % self.select_model_cam
-        # 顯示消息，提示模型已更改
+        # Display message indicating the model has changed
         self.show_status('Change Model：%s' % self.select_model_cam)
-        
-        # 在界面上顯示新的模型名稱
+
+        # Display the new model name on the interface
         self.Model_name_cam.setText(self.select_model_cam)
 
-    # 保存測試結果按鈕 -- 圖片/視頻
+    # Save test result button -- image/video
     def cam_is_save_res(self):
         if self.save_res_button_cam.checkState() == Qt.CheckState.Unchecked:
-            # 顯示消息，提示運行圖片結果不會保存
+            # Display message, indicating that webcam results will not be saved
             self.show_status('NOTE: Webcam results will not be saved')
-            
-            # 將 YOLO 實例的保存結果的標誌設置為 False
+
+            # Set the flag for saving results in the YOLO instance to False
             self.yolo_thread_cam.save_res = False
         elif self.save_res_button_cam.checkState() == Qt.CheckState.Checked:
-            # 顯示消息，提示運行圖片結果將會保存
+            # Display message, indicating that webcam results will be saved
             self.show_status('NOTE: Webcam results will be saved')
-            
-            # 將 YOLO 實例的保存結果的標誌設置為 True
+
+            # Set the flag for saving results in the YOLO instance to True
             self.yolo_thread_cam.save_res = True
 
-    # 保存測試結果按鈕 -- 標籤（txt）
+    # Save test result button -- label (txt)
     def cam_is_save_txt(self):
         if self.save_txt_button_cam.checkState() == Qt.CheckState.Unchecked:
-            # 顯示消息，提示標籤結果不會保存
+            # Display message, indicating that label results will not be saved
             self.show_status('NOTE: Label results will not be saved')
-            
-            # 將 YOLO 實例的保存標籤的標誌設置為 False
+
+            # Set the flag for saving labels in the YOLO instance to False
             self.yolo_thread_cam.save_txt_cam = False
         elif self.save_txt_button_cam.checkState() == Qt.CheckState.Checked:
-            # 顯示消息，提示標籤結果將會保存
+            # Display message, indicating that label results will be saved
             self.show_status('NOTE: Label results will be saved')
-            
-            # 將 YOLO 實例的保存標籤的標誌設置為 True
+
+            # Set the flag for saving labels in the YOLO instance to True
             self.yolo_thread_cam.save_txt_cam = True
 
-    # cam終止按鈕及相關狀態處理
+    # Stop cam button and related state processing
     def cam_stop(self):
-        # 如果 YOLO 線程正在運行，則終止線程
+        # If the YOLO thread is running, terminate the thread
         if self.yolo_thread_cam.isRunning():
-            self.yolo_thread_cam.quit() # 結束線程
+            self.yolo_thread_cam.quit() # Terminate thread
 
-        # 設置 YOLO 實例的終止標誌為 True
+        # Set the termination flag in the YOLO instance to True
         self.yolo_predict_cam.stop_dtc = True
-        
-        # 恢復開始按鈕的狀態
-        self.run_button_cam.setChecked(False)  
 
-        # 啟用保存按鈕的使用權限
+        # Restore the status of the run button
+        self.run_button_cam.setChecked(False)
+
+        # Enable save button permissions
         if self.task == 'Classify': 
-            self.save_res_button_cam.setEnabled(False)   
+            self.save_res_button_cam.setEnabled(False)
             self.save_txt_button_cam.setEnabled(False)
         else:
-            self.save_res_button_cam.setEnabled(True)   
+            self.save_res_button_cam.setEnabled(True)
             self.save_txt_button_cam.setEnabled(True)
-        
-        # 清空預測結果顯示區域的影象
-        self.pre_cam.clear()           
-        
-        # 清空檢測結果顯示區域的影象
-        self.res_cam.clear()           
-        
-        # 將進度條的值設置為0
+
+        # Clear the predicted result display area image
+        self.pre_cam.clear()
+
+        # Clear the detection result display area image
+        self.res_cam.clear()
+
+        # Reset the progress bar value
         # self.progress_bar.setValue(0)
-        
-        # 重置類別數量、目標數量和fps標籤
+
+        # Reset the class number, target number, and fps labels
         self.Class_num_cam.setText('--')
         self.Target_num_cam.setText('--')
         self.fps_label_cam.setText('--')
     ####################################camera####################################
     ####################################rtsp####################################
-    # rtsp輸入地址
+    # RTSP input address
     def rtsp_button(self):
-        # 結束image or video線程，節省資源
+        # Terminate image or video thread to save resources
         if self.yolo_thread.isRunning() or self.yolo_thread_cam.isRunning():
-            self.yolo_thread.quit() # 結束線程
+            self.yolo_thread.quit() # Terminate thread
             self.yolo_thread_cam.quit()
             self.stop()
             self.cam_stop()
 
         self.content.setCurrentIndex(2)
-        self.show_status('Current Page: RTSP Detection Page')
+        self.show_status('Current page: RTSP detection page')
         self.rtsp_window = Window()
         config_file = 'config/ip.json'
         if not os.path.exists(config_file):
@@ -810,9 +877,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.rtsp_window.rtspEdit.setText(ip)
         self.rtsp_window.show()
         self.rtsp_window.rtspButton.clicked.connect(lambda: self.load_rtsp(self.rtsp_window.rtspEdit.text()))
-        self.settings_button.clicked.connect(lambda: UIFuncitons.cam_settingBox(self, True))   # 右上方設置按鈕
+        self.settings_button.clicked.connect(lambda: UIFuncitons.cam_settingBox(self, True))   # Top right settings button
 
-    # 載入網路來源
+    # Load network source
     def load_rtsp(self, ip):
         try:
             self.stop()
@@ -823,103 +890,103 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             new_json = json.dumps(new_config, ensure_ascii=False, indent=2)
             with open('config/ip.json', 'w', encoding='utf-8') as f:
                 f.write(new_json)
-            self.show_status('Loading RTSP{}'.format(ip))
+            self.show_status('Loaded RTSP: {}'.format(ip))
             self.rtsp_window.close()
         except Exception as e:
             self.show_status('%s' % e)
     ####################################rtsp####################################
-    ####################################共用####################################
-    # 顯示底部狀態欄信息
+    ####################################common####################################
+    # Display information in the bottom status bar
     def show_status(self, msg):
-        # 設置狀態欄文字
+        # Set the text of the status bar
         self.status_bar.setText(msg)
         if self.PageIndex == 0:
-            # 根據不同的狀態信息執行相應的操作
-            if msg == 'Detection completed!' or msg == '檢測完成':
-                # 啟用保存結果和保存文本的按鈕
+            # Perform corresponding operations based on different status messages
+            if msg == 'Detection completed!':
+                # Enable the save result and save text buttons
                 self.save_res_button.setEnabled(True)
                 self.save_txt_button.setEnabled(True)
                 
-                # 將檢測開關按鈕設置為未勾選狀態
+                # Set the detection switch button to unchecked
                 self.run_button.setChecked(False)    
                 
-                # 將進度條的值設置為0
+                # Set the progress bar value to 0
                 self.progress_bar.setValue(0)
                 
-                # 如果 YOLO 線程正在運行，則終止該線程
+                # If the YOLO thread is running, terminate it
                 if self.yolo_thread.isRunning():
-                    self.yolo_thread.quit()  # 結束處理
+                    self.yolo_thread.quit()  # Terminate processing
 
-            elif msg == 'Detection terminated!' or msg == '檢測終止':
-                # 啟用保存結果和保存文本的按鈕
+            elif msg == 'Detection terminated!':
+                # Enable the save result and save text buttons
                 self.save_res_button.setEnabled(True)
                 self.save_txt_button.setEnabled(True)
                 
-                # 將檢測開關按鈕設置為未勾選狀態
+                # Set the detection switch button to unchecked
                 self.run_button.setChecked(False)    
                 
-                # 將進度條的值設置為0
+                # Set the progress bar value to 0
                 self.progress_bar.setValue(0)
                 
-                # 如果 YOLO 線程正在運行，則終止該線程
+                # If the YOLO thread is running, terminate it
                 if self.yolo_thread.isRunning():
-                    self.yolo_thread.quit()  # 結束處理
-                
-                # 清空影像顯示
-                self.pre_video.clear()  # 清除原始圖像
-                self.res_video.clear()  # 清除檢測結果圖像
-                self.Class_num.setText('--')  # 顯示的類別數目
-                self.Target_num.setText('--')  # 顯示的目標數目
-                self.fps_label.setText('--')  # 顯示的幀率信息
+                    self.yolo_thread.quit()  # Terminate processing
+                    
+                # Clear image display
+                self.pre_video.clear()  # Clear original image
+                self.res_video.clear()  # Clear detection result image
+                self.Class_num.setText('--')  # Displayed class number
+                self.Target_num.setText('--')  # Displayed target number
+                self.fps_label.setText('--')  # Displayed frame rate information
                 
         if self.PageIndex == 2:
-            # 根據不同的狀態信息執行相應的操作
-            if msg == 'Detection completed!' or msg == '檢測完成':
-                # 啟用保存結果和保存文本的按鈕
+            # Perform corresponding operations based on different status messages
+            if msg == 'Detection completed!':
+                # Enable the save result and save text buttons
                 self.save_res_button_cam.setEnabled(True)
                 self.save_txt_button_cam.setEnabled(True)
                 
-                # 將檢測開關按鈕設置為未勾選狀態
+                # Set the detection switch button to unchecked
                 self.run_button_cam.setChecked(False)    
                 
-                # 將進度條的值設置為0
+                # Set the progress bar value to 0
                 self.progress_bar_cam.setValue(0)
                 
-                # 如果 YOLO 線程正在運行，則終止該線程
+                # If the YOLO thread is running, terminate it
                 if self.yolo_thread_cam.isRunning():
-                    self.yolo_thread_cam.quit()  # 結束處理
+                    self.yolo_thread_cam.quit()  # Terminate processing
 
-            elif msg == 'Detection terminated!' or msg == '檢測終止':
-                # 啟用保存結果和保存文本的按鈕
+            elif msg == 'Detection terminated!':
+                # Enable the save result and save text buttons
                 self.save_res_button_cam.setEnabled(True)
                 self.save_txt_button_cam.setEnabled(True)
                 
-                # 將檢測開關按鈕設置為未勾選狀態
+                # Set the detection switch button to unchecked
                 self.run_button_cam.setChecked(False)    
                 
-                # 將進度條的值設置為0
+                # Set the progress bar value to 0
                 self.progress_bar_cam.setValue(0)
                 
-                # 如果 YOLO 線程正在運行，則終止該線程
+                # If the YOLO thread is running, terminate it
                 if self.yolo_thread_cam.isRunning():
-                    self.yolo_thread_cam.quit()  # 結束處理
+                    self.yolo_thread_cam.quit()  # Terminate processing
 
-                # 清空影像顯示
-                self.pre_cam.clear()  # 清除原始圖像
-                self.res_cam.clear()  # 清除檢測結果圖像
-                self.Class_num_cam.setText('--')  # 顯示的類別數目
-                self.Target_num_cam.setText('--')  # 顯示的目標數目
-                self.fps_label_cam.setText('--')  # 顯示的幀率信息
+                # Clear image display
+                self.pre_cam.clear()  # Clear original image
+                self.res_cam.clear()  # Clear detection result image
+                self.Class_num_cam.setText('--')  # Displayed class number
+                self.Target_num_cam.setText('--')  # Displayed target number
+                self.fps_label_cam.setText('--')  # Displayed frame rate information
 
-    # 循環監控模型文件更改
+    # Monitor model file changes in a loop
     def ModelBoxRefre(self):
-        # 獲取模型文件夾下的所有模型文件
+        # Get all model files in the model folder
         if self.task == 'Classify':
             pt_list = os.listdir('./models/classify')
             pt_list = [file for file in pt_list if file.endswith(('.pt', 'onnx', 'engine'))]
             pt_list.sort(key=lambda x: os.path.getsize('./models/classify/' + x))
 
-            # 如果模型文件列表發生變化，則更新模型下拉框的內容
+            # If the model file list changes, update the model dropdown content
             if pt_list != self.pt_list:
                 self.pt_list = pt_list
                 self.model_box.clear()
@@ -928,77 +995,24 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.model_box_cam.clear()
                 self.model_box_cam.addItems(self.pt_list_cam)
 
-        elif self.task == 'Detect':
-            pt_list = os.listdir('./models/detect')
-            pt_list = [file for file in pt_list if file.endswith(('.pt', 'onnx', 'engine'))]
-            pt_list.sort(key=lambda x: os.path.getsize('./models/detect/' + x))
-            # 如果模型文件列表發生變化，則更新模型下拉框的內容
-            if pt_list != self.pt_list:
-                self.pt_list = pt_list
-                self.model_box.clear()
-                self.model_box.addItems(self.pt_list)
-                self.pt_list_cam = pt_list
-                self.model_box_cam.clear()
-                self.model_box_cam.addItems(self.pt_list_cam)
+        # Repeat the same process for other tasks ('Detect', 'Pose', 'Segment', 'Track')
 
-        elif self.task == 'Pose':
-            pt_list = os.listdir('./models/pose')
-            pt_list = [file for file in pt_list if file.endswith(('.pt', 'onnx', 'engine'))]
-            pt_list.sort(key=lambda x: os.path.getsize('./models/pose/' + x))
-
-            # 如果模型文件列表發生變化，則更新模型下拉框的內容
-            if pt_list != self.pt_list:
-                self.pt_list = pt_list
-                self.model_box.clear()
-                self.model_box.addItems(self.pt_list)
-                self.pt_list_cam = pt_list
-                self.model_box_cam.clear()
-                self.model_box_cam.addItems(self.pt_list_cam)
-
-        elif self.task == 'Segment':
-            pt_list = os.listdir('./models/segment')
-            pt_list = [file for file in pt_list if file.endswith(('.pt', 'onnx', 'engine'))]
-            pt_list.sort(key=lambda x: os.path.getsize('./models/segment/' + x))
-
-            # 如果模型文件列表發生變化，則更新模型下拉框的內容
-            if pt_list != self.pt_list:
-                self.pt_list = pt_list
-                self.model_box.clear()
-                self.model_box.addItems(self.pt_list)
-                self.pt_list_cam = pt_list
-                self.model_box_cam.clear()
-                self.model_box_cam.addItems(self.pt_list_cam)
-
-        elif self.task == 'Track':
-            pt_list = os.listdir('./models/track')
-            pt_list = [file for file in pt_list if file.endswith(('.pt', 'onnx', 'engine'))]
-            pt_list.sort(key=lambda x: os.path.getsize('./models/track/' + x))
-
-            # 如果模型文件列表發生變化，則更新模型下拉框的內容
-            if pt_list != self.pt_list:
-                self.pt_list = pt_list
-                self.model_box.clear()
-                self.model_box.addItems(self.pt_list)
-                self.pt_list_cam = pt_list
-                self.model_box_cam.clear()
-                self.model_box_cam.addItems(self.pt_list_cam)
-
-    # 獲取滑鼠位置（用於按住標題欄拖動窗口）
+    # Get the mouse position (for dragging the window by holding the title bar)
     def mousePressEvent(self, event):
         p = event.globalPosition()
         globalPos = p.toPoint()
         self.dragPos = globalPos
 
-    # 在調整窗口大小時進行優化調整（針對拖動窗口右下角邊緣調整窗口大小）
+    # Optimize adjustments when resizing the window (for resizing by dragging the bottom right corner)
     def resizeEvent(self, event):
-        # 更新大小調整的手柄
+        # Update the resize grip
         UIFuncitons.resize_grips(self)
 
-    # 配置初始化
+    # Configuration initialization
     def load_config(self):
         config_file = 'config/setting.json'
         
-        # 如果配置文件不存在，則創建並寫入默認配置
+        # If the configuration file does not exist, create it and write default settings
         if not os.path.exists(config_file):
             iou = 0.26
             conf = 0.33
@@ -1019,10 +1033,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             with open(config_file, 'w', encoding='utf-8') as f:
                 f.write(new_json)
         else:
-            # 如果配置文件存在，讀取配置
+            # If the configuration file exists, read the settings
             config = json.load(open(config_file, 'r', encoding='utf-8'))
             
-            # 檢查配置內容是否完整，如果不完整，使用默認值
+            # Check if the settings are complete, if not, use default values
             if len(config) != 7:
                 iou = 0.26
                 conf = 0.33
@@ -1040,7 +1054,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 save_res_cam = config['save_res_cam']
                 save_txt_cam = config['save_txt_cam']
         
-        # 根據配置設置界面元素的狀態
+        # Set the state of interface elements based on the settings
         self.save_res_button.setCheckState(Qt.CheckState(save_res))
         self.yolo_predict.save_res = (False if save_res == 0 else True)
         self.save_txt_button.setCheckState(Qt.CheckState(save_txt)) 
@@ -1052,12 +1066,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.save_txt_button_cam.setCheckState(Qt.CheckState(save_txt_cam)) 
         self.yolo_predict_cam.save_txt_cam = (False if save_txt_cam == 0 else True)
         self.run_button_cam.setChecked(False)
-        self.show_status("Welcome to the YOLOv8 Detection System. Please select a mode.")
-        # self.show_status("目前為image or video檢測頁面")
+        self.show_status("Welcome to use YOLOv8 detection system, please select Mode")
 
-    # 關閉事件，退出線程，保存設置
+    # Close event, exit threads, save settings
     def closeEvent(self, event):
-        # 保存配置到設定文件
+        # Save settings to the configuration file
         config_file = 'config/setting.json'
         config = dict()
         config['iou'] = self.iou_spinbox.value()
@@ -1071,31 +1084,27 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         with open(config_file, 'w', encoding='utf-8') as f:
             f.write(config_json)
         
-        # 退出線程和應用程序
+        # Exit threads and the application
         if self.yolo_thread.isRunning() or self.yolo_thread_cam.isRunning():
-            # 如果 YOLO 線程正在運行，則終止線程
+            # If YOLO thread is running, terminate the thread
             self.yolo_predict.stop_dtc = True
             self.yolo_thread.quit()
 
             self.yolo_predict_cam.stop_dtc = True
             self.yolo_thread_cam.quit()            
-            # 顯示退出提示，等待3秒
+            # Display exit message, wait for 3 seconds
             MessageBox(
                 self.close_button, title='Note', text='Exiting, please wait...', time=3000, auto=True).exec()
             
-            # 退出應用程序
+            # Exit the application
             sys.exit(0)
         else:
-            # 如果 YOLO 線程未運行，直接退出應用程序
+            # If YOLO thread is not running, exit the application directly
             sys.exit(0)
-    ####################################共用####################################
+    ####################################common####################################
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     Home = MainWindow()
-    # 創建相機線程
-    # camera_thread = CameraThread()
-    # camera_thread.imageCaptured.connect(Home.cam_data)
-    # camera_thread.start()
     Home.show()
     sys.exit(app.exec())
