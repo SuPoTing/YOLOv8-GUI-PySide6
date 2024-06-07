@@ -1167,34 +1167,29 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             event.acceptProposedAction()
         
     def dropEvent(self, event):
-        try:
-            file = event.mimeData().urls()[0].toLocalFile()
-            if file:
-                if os.path.isdir(file):
+        file = event.mimeData().urls()[0].toLocalFile()
+        if file:
+            if os.path.isdir(file):
                 if self.task == 'Track':
                     FileFormat = [".mp4", ".mkv", ".avi", ".flv"]
                 else:
                     FileFormat = [".mp4", ".mkv", ".avi", ".flv", ".jpg", ".png", ".jpeg", ".bmp", ".dib", ".jpe", ".jp2"]
-                    Foldername = [(file + "/" + filename) for filename in os.listdir(file) for jpgname in
-                                  FileFormat
-                                  if jpgname in filename]
-                    self.yolo_predict.source = Foldername
-                    self.show_image(self.yolo_predict.source[0], self.pre_video, 'path')
-                    self.show_status('載入資料夾：{}'.format(os.path.basename(file)))
+                Foldername = [(file + "/" + filename) for filename in os.listdir(file) for jpgname in
+                              FileFormat
+                              if jpgname in filename]
+                self.yolo_predict.source = Foldername
+                self.show_image(self.yolo_predict.source[0], self.pre_video, 'path')
+                self.show_status('載入資料夾：{}'.format(os.path.basename(file)))
+            else:
+                self.yolo_predict.source = file
+                if ".avi" or ".mp4" in self.yolo_predict.source:
+                    self.cap = cv2.VideoCapture(self.yolo_predict.source)
+                    ret, frame = self.cap.read()
+                    if ret:
+                        self.show_image(frame, self.pre_video, 'img')
                 else:
-                    self.yolo_predict.source = file
-                    if ".avi" or ".mp4" in self.yolo_predict.source:
-                        self.cap = cv2.VideoCapture(self.yolo_predict.source)
-                        ret, frame = self.cap.read()
-                        if ret:
-                            self.show_image(frame, self.pre_video, 'img')
-                    else:
-                        self.show_image(self.yolo_predict.source, self.pre_video, 'path')
-                    self.show_status('載入檔案：{}'.format(os.path.basename(self.yolo_predict.source)))
-        except Exception as e:
-            # 處理異常，印出錯誤信息
-            traceback.print_exc()
-            print(f"Error: {e}")
+                    self.show_image(self.yolo_predict.source, self.pre_video, 'path')
+                self.show_status('載入檔案：{}'.format(os.path.basename(self.yolo_predict.source)))
     ####################################共用####################################
 if __name__ == "__main__":
     app = QApplication(sys.argv)
