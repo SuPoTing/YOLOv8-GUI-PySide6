@@ -379,29 +379,27 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         
         # 如果用戶選擇了檔案
         if FolderPath:
-            if self.task == 'Track':
-                FileFormat = [".mp4", ".mkv", ".avi", ".flv"]
-            else:
-                FileFormat = [".mp4", ".mkv", ".avi", ".flv", ".jpg", ".png", ".jpeg", ".bmp", ".dib", ".jpe", ".jp2"]
+            FileFormat = [".jpg", ".png", ".jpeg", ".bmp", ".dib", ".jpe", ".jp2"]
             Foldername = [(FolderPath + "/" + filename) for filename in os.listdir(FolderPath) for jpgname in FileFormat
                           if jpgname in filename]
-            # 將所選檔案的路徑設置為 yolo_predict 的 source
-            self.yolo_predict.source = Foldername
-            
-            # 顯示檔案載入狀態
-            self.show_status('載入資料夾：{}'.format(os.path.basename(FolderPath)))
-            
-            # 更新配置檔中的上次打開的資料夾路徑
-            config['open_fold'] = os.path.dirname(FolderPath)
-            
-            # 將更新後的配置檔寫回到檔案中
-            config_json = json.dumps(config, ensure_ascii=False, indent=2)
-            with open(config_file, 'w', encoding='utf-8') as f:
-                f.write(config_json)
-            
-            # 停止檢測
-            self.stop()
-
+            if Foldername:
+                # 將所選檔案的路徑設置為 yolo_predict 的 source
+                self.yolo_predict.source = Foldername
+                # 顯示檔案載入狀態
+                self.show_status('載入資料夾：{}'.format(os.path.basename(FolderPath)))
+                # 更新配置檔中的上次打開的資料夾路徑
+                config['open_fold'] = os.path.dirname(FolderPath)
+                
+                # 將更新後的配置檔寫回到檔案中
+                config_json = json.dumps(config, ensure_ascii=False, indent=2)
+                with open(config_file, 'w', encoding='utf-8') as f:
+                    f.write(config_json)
+                
+                # 停止檢測
+                self.stop()
+            else:
+                self.show_status('資料夾內沒有圖片...')
+         
     # 選擇本地檔案
     def open_src_img(self):
         if self.task == 'Classify':
@@ -1167,29 +1165,32 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             event.acceptProposedAction()
         
     def dropEvent(self, event):
-        file = event.mimeData().urls()[0].toLocalFile()
-        if file:
-            if os.path.isdir(file):
-                if self.task == 'Track':
-                    FileFormat = [".mp4", ".mkv", ".avi", ".flv"]
+        try:
+            file = event.mimeData().urls()[0].toLocalFile()
+            if file:
+                if os.path.isdir(file):
+                    FileFormat = [".jpg", ".png", ".jpeg", ".bmp", ".dib", ".jpe", ".jp2"]
+                    Foldername = [(file + "/" + filename) for filename in os.listdir(file) for jpgname in
+                                  FileFormat
+                                  if jpgname in filename]
+                    if Foldername:
+                        self.yolo_predict.source = Foldername
+                        self.show_image(self.yolo_predict.source[0], self.pre_video, 'path')
+                        self.show_status('載入資料夾：{}'.format(os.path.basename(file)))
+                    else:
+                        self.show_status('資料夾內沒有圖片...')
                 else:
-                    FileFormat = [".mp4", ".mkv", ".avi", ".flv", ".jpg", ".png", ".jpeg", ".bmp", ".dib", ".jpe", ".jp2"]
-                Foldername = [(file + "/" + filename) for filename in os.listdir(file) for jpgname in
-                              FileFormat
-                              if jpgname in filename]
-                self.yolo_predict.source = Foldername
-                self.show_image(self.yolo_predict.source[0], self.pre_video, 'path')
-                self.show_status('載入資料夾：{}'.format(os.path.basename(file)))
-            else:
-                self.yolo_predict.source = file
-                if ".avi" or ".mp4" in self.yolo_predict.source:
-                    self.cap = cv2.VideoCapture(self.yolo_predict.source)
-                    ret, frame = self.cap.read()
-                    if ret:
-                        self.show_image(frame, self.pre_video, 'img')
-                else:
-                    self.show_image(self.yolo_predict.source, self.pre_video, 'path')
-                self.show_status('載入檔案：{}'.format(os.path.basename(self.yolo_predict.source)))
+                    self.yolo_predict.source = file
+                    if ".avi" or ".mp4" in self.yolo_predict.source:
+                        self.cap = cv2.VideoCapture(self.yolo_predict.source)
+                        ret, frame = self.cap.read()
+                        if ret:
+                            self.show_image(frame, self.pre_video, 'img')
+                    else:
+                        self.show_image(self.yolo_predict.source, self.pre_video, 'path')
+                    self.show_status('載入檔案：{}'.format(os.path.basename(self.yolo_predict.source)))
+        except Exception as e:
+            self.show_status('%s' % e)
     ####################################共用####################################
 if __name__ == "__main__":
     app = QApplication(sys.argv)
