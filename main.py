@@ -376,20 +376,26 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             open_fold = os.getcwd()
         
         if self.task == 'Track':
-            name = QFileDialog.getExistingDirectory(self, 'Select your Folder', open_fold)
+            FolderPath = QFileDialog.getExistingDirectory(self, 'Select your Folder', open_fold)
         else:
-            name = QFileDialog.getExistingDirectory(self, 'Select your Folder', open_fold)
+            FolderPath = QFileDialog.getExistingDirectory(self, 'Select your Folder', open_fold)
         
         # 如果用戶選擇了檔案
-        if name:
+        if FolderPath:
+            if self.task == 'Track':
+                FileFormat = [".mp4", ".mkv", ".avi", ".flv"]
+            else:
+                FileFormat = [".mp4", ".mkv", ".avi", ".flv", ".jpg", ".png", ".jpeg", ".bmp", ".dib", ".jpe", ".jp2"]
+            Foldername = [(FolderPath + "/" + filename) for filename in os.listdir(FolderPath) for jpgname in FileFormat
+                          if jpgname in filename]
             # 將所選檔案的路徑設置為 yolo_predict 的 source
-            self.yolo_predict.source = name
+            self.yolo_predict.source = Foldername
             
             # 顯示檔案載入狀態
-            self.show_status('載入資料夾：{}'.format(os.path.dirname(name)))
+            self.show_status('載入資料夾：{}'.format(os.path.basename(FolderPath)))
             
             # 更新配置檔中的上次打開的資料夾路徑
-            config['open_fold'] = os.path.dirname(name)
+            config['open_fold'] = os.path.dirname(FolderPath)
             
             # 將更新後的配置檔寫回到檔案中
             config_json = json.dumps(config, ensure_ascii=False, indent=2)
@@ -1158,39 +1164,32 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             # 如果 YOLO 線程未運行，直接退出應用程序
             sys.exit(0)
 
-    # 滑鼠拖入事件
     def dragEnterEvent(self, event):
-        if event.mimeData().hasUrls():  # 檢查是否為檔案
-            event.acceptProposedAction()  # 接受拖移的資料
-
-
+        if event.mimeData().hasUrls():
+            event.acceptProposedAction()
+        
     def dropEvent(self, event):
         try:
-            file = event.mimeData().urls()[0].toLocalFile()  # ==> 取得檔案路徑
+            file = event.mimeData().urls()[0].toLocalFile()
             if file:
-                # 判斷是否為資料夾
                 if os.path.isdir(file):
                     FileFormat = [".mp4", ".mkv", ".avi", ".flv", ".jpg", ".png", ".jpeg", ".bmp", ".dib", ".jpe", ".jp2"]
                     Foldername = [(file + "/" + filename) for filename in os.listdir(file) for jpgname in
                                   FileFormat
                                   if jpgname in filename]
                     self.yolo_predict.source = Foldername
-                    self.show_image(self.yolo_predict.source[0], self.pre_video, 'path')  # 顯示資料夾中第一張圖片
-                    self.show_status('Loaded Folder：{}'.format(os.path.basename(file)))
-                # 圖片 / 影片
+                    self.show_image(self.yolo_predict.source[0], self.pre_video, 'path')
+                    self.show_status('載入資料夾：{}'.format(os.path.basename(file)))
                 else:
                     self.yolo_predict.source = file
-                    # 如果是影片顯示第一幀
                     if ".avi" or ".mp4" in self.yolo_predict.source:
-                        # 顯示第一幀
                         self.cap = cv2.VideoCapture(self.yolo_predict.source)
                         ret, frame = self.cap.read()
                         if ret:
                             self.show_image(frame, self.pre_video, 'img')
-                    # 如果是圖片正常顯示
                     else:
                         self.show_image(self.yolo_predict.source, self.pre_video, 'path')
-                    self.show_status('Loaded File：{}'.format(os.path.basename(self.yolo_predict.source)))
+                    self.show_status('載入檔案：{}'.format(os.path.basename(self.yolo_predict.source)))
         except Exception as e:
             # 處理異常，印出錯誤信息
             traceback.print_exc()
