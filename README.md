@@ -28,13 +28,15 @@
 ## To Do
 - [x] The input source supports camera
 - [x] Support `chose_rtsp`、`load_rtsp` function in `main.py`
-- [ ] Graph showing changes in target quantity
+- [X] Support Dragging File Input
 - [x] Added folder(batch) detection function
 - [x] Target tracking
 - [x] Instance segmentation
 - [ ] Monitor system hardware usage
+- [ ] Graph showing changes in target quantity
 
 ## References
 - [PyQt5-YOLOv5](https://github.com/Javacr/PyQt5-YOLOv5)
 - [ultralytics](https://github.com/ultralytics/ultralytics)
 - [PySide6-YOLOv8](https://github.com/Jai-wei/YOLOv8-PySide6-GUI/tree/main)
+- [YOLOSHOW](https://github.com/SwimmingLiu/YOLOSHOW/tree/31644373fca58aefcc9dba72a610c92031e5331b)
