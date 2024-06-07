@@ -380,28 +380,28 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         
         # If the user selects a file
         if FolderPath:
-            if self.task == 'Track':
-                FileFormat = [".mp4", ".mkv", ".avi", ".flv"]
-            else:
-                FileFormat = [".mp4", ".mkv", ".avi", ".flv", ".jpg", ".png", ".jpeg", ".bmp", ".dib", ".jpe", ".jp2"]
+            FileFormat = [".jpg", ".png", ".jpeg", ".bmp", ".dib", ".jpe", ".jp2"]
             Foldername = [(FolderPath + "/" + filename) for filename in os.listdir(FolderPath) for jpgname in FileFormat
                           if jpgname in filename]
-            # Set the selected file path as the source for yolo_predict
-            self.yolo_predict.source = Foldername
-            
-            # Display the folder load status
-            self.show_status('Load folder: {}'.format(os.path.dirname(FolderPath)))
-            
-            # Update the last opened folder path in the configuration file
-            config['open_fold'] = os.path.dirname(FolderPath)
-            
-            # Write the updated configuration file back to the file
-            config_json = json.dumps(config, ensure_ascii=False, indent=2)
-            with open(config_file, 'w', encoding='utf-8') as f:
-                f.write(config_json)
-            
-            # Stop detection
-            self.stop()
+            if Foldername:
+                # Set the selected file path as the source for yolo_predict
+                self.yolo_predict.source = Foldername
+                
+                # Display the folder load status
+                self.show_status('Load folder: {}'.format(os.path.dirname(FolderPath)))
+                
+                # Update the last opened folder path in the configuration file
+                config['open_fold'] = os.path.dirname(FolderPath)
+                
+                # Write the updated configuration file back to the file
+                config_json = json.dumps(config, ensure_ascii=False, indent=2)
+                with open(config_file, 'w', encoding='utf-8') as f:
+                    f.write(config_json)
+                
+                # Stop detection
+                self.stop()
+            else:
+                self.show_status('There are no pictures in the folder...')
 
     # Open local file
     def open_src_img(self):
@@ -1115,16 +1115,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         file = event.mimeData().urls()[0].toLocalFile()
         if file:
             if os.path.isdir(file):
-                if self.task == 'Track':
-                    FileFormat = [".mp4", ".mkv", ".avi", ".flv"]
-                else:
-                    FileFormat = [".mp4", ".mkv", ".avi", ".flv", ".jpg", ".png", ".jpeg", ".bmp", ".dib", ".jpe", ".jp2"]
+                FileFormat = [".jpg", ".png", ".jpeg", ".bmp", ".dib", ".jpe", ".jp2"]
                 Foldername = [(file + "/" + filename) for filename in os.listdir(file) for jpgname in
                               FileFormat
                               if jpgname in filename]
-                self.yolo_predict.source = Foldername
-                self.show_image(self.yolo_predict.source[0], self.pre_video, 'path')
-                self.show_status('Loaded Folder：{}'.format(os.path.basename(file)))
+                if Foldername:
+                    self.yolo_predict.source = Foldername
+                    self.show_image(self.yolo_predict.source[0], self.pre_video, 'path')
+                    self.show_status('Loaded Folder：{}'.format(os.path.basename(file)))
+                else:
+                    self.show_status('There are no pictures in the folder...')
             else:
                 self.yolo_predict.source = file
                 if ".avi" or ".mp4" in self.yolo_predict.source:
@@ -1140,9 +1140,5 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     Home = MainWindow()
-    # 創建相機線程
-    # camera_thread = CameraThread()
-    # camera_thread.imageCaptured.connect(Home.cam_data)
-    # camera_thread.start()
     Home.show()
     sys.exit(app.exec())
