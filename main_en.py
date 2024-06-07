@@ -377,20 +377,26 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             open_fold = os.getcwd()
         
         if self.task == 'Track':
-            name = QFileDialog.getExistingDirectory(self, 'Select your Folder', open_fold)
+            FolderPath = QFileDialog.getExistingDirectory(self, 'Select your Folder', open_fold)
         else:
-            name = QFileDialog.getExistingDirectory(self, 'Select your Folder', open_fold)
+            FolderPath = QFileDialog.getExistingDirectory(self, 'Select your Folder', open_fold)
         
         # If the user selects a file
-        if name:
+        if FolderPath:
+            if self.task == 'Track':
+                FileFormat = [".mp4", ".mkv", ".avi", ".flv"]
+            else:
+                FileFormat = [".mp4", ".mkv", ".avi", ".flv", ".jpg", ".png", ".jpeg", ".bmp", ".dib", ".jpe", ".jp2"]
+            Foldername = [(FolderPath + "/" + filename) for filename in os.listdir(FolderPath) for jpgname in FileFormat
+                          if jpgname in filename]
             # Set the selected file path as the source for yolo_predict
-            self.yolo_predict.source = name
+            self.yolo_predict.source = Foldername
             
             # Display the folder load status
-            self.show_status('Load folder: {}'.format(os.path.dirname(name)))
+            self.show_status('Load folder: {}'.format(os.path.basename(FolderPath)))
             
             # Update the last opened folder path in the configuration file
-            config['open_fold'] = os.path.dirname(name)
+            config['open_fold'] = os.path.dirname(FolderPath)
             
             # Write the updated configuration file back to the file
             config_json = json.dumps(config, ensure_ascii=False, indent=2)
