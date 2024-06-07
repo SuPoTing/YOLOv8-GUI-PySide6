@@ -471,7 +471,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def show_image(img_src, label, flag):
         try:
             if flag == "path":
-                img_src = cv2.imdecode(np.fromfile(img, dtype=np.uint8), -1)
+                img_src = cv2.imdecode(np.fromfile(img_src, dtype=np.uint8), -1)
             # 獲取原始圖片的高度、寬度和通道數
             ih, iw, _ = img_src.shape
             # 獲取標籤(label)的寬度和高度
