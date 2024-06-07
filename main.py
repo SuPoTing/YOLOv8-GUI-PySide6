@@ -375,10 +375,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if not os.path.exists(open_fold):
             open_fold = os.getcwd()
         
-        if self.task == 'Track':
-            FolderPath = QFileDialog.getExistingDirectory(self, 'Select your Folder', open_fold)
-        else:
-            FolderPath = QFileDialog.getExistingDirectory(self, 'Select your Folder', open_fold)
+        FolderPath = QFileDialog.getExistingDirectory(self, 'Select your Folder', open_fold)
         
         # 如果用戶選擇了檔案
         if FolderPath:
@@ -502,6 +499,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         except Exception as e:
             # 處理異常，印出錯誤信息
+            traceback.print_exc()
             print(repr(e))
 
     # 控制開始/暫停檢測
