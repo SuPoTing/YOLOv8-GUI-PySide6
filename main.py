@@ -1165,33 +1165,36 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
 
     def dropEvent(self, event):
-        # files = [url.toLocalFile() for url in event.mimeData().urls()]  # 取得所有檔案路徑
-        file = event.mimeData().urls()[0].toLocalFile()  # ==> 取得檔案路徑
-        if file:
-            # 判斷是否為資料夾
-            if os.path.isdir(file):
-                FileFormat = [".mp4", ".mkv", ".avi", ".flv", ".jpg", ".png", ".jpeg", ".bmp", ".dib", ".jpe", ".jp2"]
-                Foldername = [(file + "/" + filename) for filename in os.listdir(file) for jpgname in
-                              FileFormat
-                              if jpgname in filename]
-                self.yolo_predict.source = Foldername
-                self.show_image(self.yolo_predict.source[0], self.pre_video, 'path')  # 顯示資料夾中第一張圖片
-                self.show_status('Loaded Folder：{}'.format(os.path.basename(file)))
-            # 圖片 / 影片
-            else:
-                self.yolo_predict.source = file
-                # 如果是影片顯示第一幀
-                if ".avi" or ".mp4" in self.yolo_predict.source:
-                    # 顯示第一幀
-                    self.cap = cv2.VideoCapture(self.yolo_predict.source)
-                    ret, frame = self.cap.read()
-                    if ret:
-                        # rgbImage = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                        self.show_image(frame, self.pre_video, 'img')
-                # 如果是圖片正常顯示
+        try:
+            file = event.mimeData().urls()[0].toLocalFile()  # ==> 取得檔案路徑
+            if file:
+                # 判斷是否為資料夾
+                if os.path.isdir(file):
+                    FileFormat = [".mp4", ".mkv", ".avi", ".flv", ".jpg", ".png", ".jpeg", ".bmp", ".dib", ".jpe", ".jp2"]
+                    Foldername = [(file + "/" + filename) for filename in os.listdir(file) for jpgname in
+                                  FileFormat
+                                  if jpgname in filename]
+                    self.yolo_predict.source = Foldername
+                    self.show_image(self.yolo_predict.source[0], self.pre_video, 'path')  # 顯示資料夾中第一張圖片
+                    self.show_status('Loaded Folder：{}'.format(os.path.basename(file)))
+                # 圖片 / 影片
                 else:
-                    self.show_image(self.yolo_predict.source, self.pre_video, 'path')
-                self.show_status('Loaded File：{}'.format(os.path.basename(self.yolo_predict.source)))
+                    self.yolo_predict.source = file
+                    # 如果是影片顯示第一幀
+                    if ".avi" or ".mp4" in self.yolo_predict.source:
+                        # 顯示第一幀
+                        self.cap = cv2.VideoCapture(self.yolo_predict.source)
+                        ret, frame = self.cap.read()
+                        if ret:
+                            self.show_image(frame, self.pre_video, 'img')
+                    # 如果是圖片正常顯示
+                    else:
+                        self.show_image(self.yolo_predict.source, self.pre_video, 'path')
+                    self.show_status('Loaded File：{}'.format(os.path.basename(self.yolo_predict.source)))
+        except Exception as e:
+            # 處理異常，印出錯誤信息
+            traceback.print_exc()
+            print(f"Error: {e}")
     ####################################共用####################################
 if __name__ == "__main__":
     app = QApplication(sys.argv)
