@@ -54,8 +54,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.select_model = self.model_box.currentText()  # Default model
         
         self.yolo_thread = QThread()  # Create YOLO thread
-        self.yolo_predict.yolo2main_pre_img.connect(lambda x: self.show_image(x, self.pre_video))
-        self.yolo_predict.yolo2main_res_img.connect(lambda x: self.show_image(x, self.res_video))
+        self.yolo_predict.yolo2main_pre_img.connect(lambda x: self.show_image(x, self.pre_video, 'img'))
+        self.yolo_predict.yolo2main_res_img.connect(lambda x: self.show_image(x, self.res_video, 'img'))
         self.yolo_predict.yolo2main_status_msg.connect(lambda x: self.show_status(x))        
         self.yolo_predict.yolo2main_fps.connect(lambda x: self.fps_label.setText(x))      
         self.yolo_predict.yolo2main_class_num.connect(lambda x: self.Class_num.setText(str(x)))    
@@ -375,11 +375,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Use the current working directory if the last opened folder does not exist
         if not os.path.exists(open_fold):
             open_fold = os.getcwd()
-        
-        if self.task == 'Track':
-            FolderPath = QFileDialog.getExistingDirectory(self, 'Select your Folder', open_fold)
-        else:
-            FolderPath = QFileDialog.getExistingDirectory(self, 'Select your Folder', open_fold)
+
+        FolderPath = QFileDialog.getExistingDirectory(self, 'Select your Folder', open_fold)
         
         # If the user selects a file
         if FolderPath:
@@ -393,7 +390,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.yolo_predict.source = Foldername
             
             # Display the folder load status
-            self.show_status('Load folder: {}'.format(os.path.basename(FolderPath)))
+            self.show_status('Load folder: {}'.format(os.path.dirname(FolderPath)))
             
             # Update the last opened folder path in the configuration file
             config['open_fold'] = os.path.dirname(FolderPath)
@@ -469,8 +466,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     # Display original image and detection result in main window
     @staticmethod
-    def show_image(img_src, label):
+    def show_image(img_src, label, flag):
         try:
+            if flag == "path":
+                img_src = cv2.imdecode(np.fromfile(img_src, dtype=np.uint8), -1)
             # Get the height, width, and number of channels of the original image
             ih, iw, _ = img_src.shape
             # Get the width and height of the label
@@ -1113,34 +1112,34 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             event.acceptProposedAction()
 
     def dropEvent(self, event):
-        try:
-            file = event.mimeData().urls()[0].toLocalFile()
-            if file:
-                if os.path.isdir(file):
-                    FileFormat = [".mp4", ".mkv", ".avi", ".flv", ".jpg", ".png", ".jpeg", ".bmp", ".dib", ".jpe", ".jp2"]
-                    Foldername = [(file + "/" + filename) for filename in os.listdir(file) for jpgname in
-                                  FileFormat
-                                  if jpgname in filename]
-                    self.yolo_predict.source = Foldername
-                    self.show_image(self.yolo_predict.source[0], self.pre_video, 'path')
-                    self.show_status('Loaded Folder：{}'.format(os.path.basename(file)))
+        file = event.mimeData().urls()[0].toLocalFile()
+        if file:
+            if os.path.isdir(file):
+                FileFormat = [".mp4", ".mkv", ".avi", ".flv", ".jpg", ".png", ".jpeg", ".bmp", ".dib", ".jpe", ".jp2"]
+                Foldername = [(file + "/" + filename) for filename in os.listdir(file) for jpgname in
+                              FileFormat
+                              if jpgname in filename]
+                self.yolo_predict.source = Foldername
+                self.show_image(self.yolo_predict.source[0], self.pre_video, 'path')
+                self.show_status('Loaded Folder：{}'.format(os.path.basename(file)))
+            else:
+                self.yolo_predict.source = file
+                if ".avi" or ".mp4" in self.yolo_predict.source:
+                    self.cap = cv2.VideoCapture(self.yolo_predict.source)
+                    ret, frame = self.cap.read()
+                    if ret:
+                        self.show_image(frame, self.pre_video, 'img')
                 else:
-                    self.yolo_predict.source = file
-                    if ".avi" or ".mp4" in self.yolo_predict.source:
-                        self.cap = cv2.VideoCapture(self.yolo_predict.source)
-                        ret, frame = self.cap.read()
-                        if ret:
-                            self.show_image(frame, self.pre_video, 'img')
-                    else:
-                        self.show_image(self.yolo_predict.source, self.pre_video, 'path')
-                    self.show_status('Loaded File：{}'.format(os.path.basename(self.yolo_predict.source)))
-        except Exception as e:
-            traceback.print_exc()
-            print(f"Error: {e}")
+                    self.show_image(self.yolo_predict.source, self.pre_video, 'path')
+                self.show_status('Loaded File：{}'.format(os.path.basename(self.yolo_predict.source)))
     ####################################common####################################
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     Home = MainWindow()
+    # 創建相機線程
+    # camera_thread = CameraThread()
+    # camera_thread.imageCaptured.connect(Home.cam_data)
+    # camera_thread.start()
     Home.show()
     sys.exit(app.exec())
