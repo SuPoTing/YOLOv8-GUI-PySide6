@@ -1132,9 +1132,5 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     Home = MainWindow()
-    # 創建相機線程
-    # camera_thread = CameraThread()
-    # camera_thread.imageCaptured.connect(Home.cam_data)
-    # camera_thread.start()
     Home.show()
     sys.exit(app.exec())
