@@ -1101,10 +1101,40 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         else:
             # If YOLO thread is not running, exit the application directly
             sys.exit(0)
+
+    def dragEnterEvent(self, event):
+        if event.mimeData().hasUrls():
+            event.acceptProposedAction()
+
+    def dropEvent(self, event):
+        file = event.mimeData().urls()[0].toLocalFile()
+        if file:
+            if os.path.isdir(file):
+                FileFormat = [".mp4", ".mkv", ".avi", ".flv", ".jpg", ".png", ".jpeg", ".bmp", ".dib", ".jpe", ".jp2"]
+                Foldername = [(file + "/" + filename) for filename in os.listdir(file) for jpgname in
+                              FileFormat
+                              if jpgname in filename]
+                self.yolo_predict.source = Foldername
+                self.show_image(self.yolo_predict.source[0], self.pre_video, 'path')
+                self.show_status('Loaded Folder：{}'.format(os.path.basename(file)))
+            else:
+                self.yolo_predict.source = file
+                if ".avi" or ".mp4" in self.yolo_predict.source:
+                    self.cap = cv2.VideoCapture(self.yolo_predict.source)
+                    ret, frame = self.cap.read()
+                    if ret:
+                        self.show_image(frame, self.pre_video, 'img')
+                else:
+                    self.show_image(self.yolo_predict.source, self.pre_video, 'path')
+                self.show_status('Loaded File：{}'.format(os.path.basename(self.yolo_predict.source)))
     ####################################common####################################
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     Home = MainWindow()
+    # 創建相機線程
+    # camera_thread = CameraThread()
+    # camera_thread.imageCaptured.connect(Home.cam_data)
+    # camera_thread.start()
     Home.show()
     sys.exit(app.exec())
