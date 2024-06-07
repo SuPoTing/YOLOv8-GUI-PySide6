@@ -1171,6 +1171,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             file = event.mimeData().urls()[0].toLocalFile()
             if file:
                 if os.path.isdir(file):
+                if self.task == 'Track':
+                    FileFormat = [".mp4", ".mkv", ".avi", ".flv"]
+                else:
                     FileFormat = [".mp4", ".mkv", ".avi", ".flv", ".jpg", ".png", ".jpeg", ".bmp", ".dib", ".jpe", ".jp2"]
                     Foldername = [(file + "/" + filename) for filename in os.listdir(file) for jpgname in
                                   FileFormat
