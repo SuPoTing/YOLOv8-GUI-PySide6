@@ -1168,7 +1168,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # files = [url.toLocalFile() for url in event.mimeData().urls()]  # 取得所有檔案路徑
         file = event.mimeData().urls()[0].toLocalFile()  # ==> 取得檔案路徑
         if file:
-            # 判断是否是文件夹
+            # 判斷是否為資料夾
             if os.path.isdir(file):
                 FileFormat = [".mp4", ".mkv", ".avi", ".flv", ".jpg", ".png", ".jpeg", ".bmp", ".dib", ".jpe", ".jp2"]
                 Foldername = [(file + "/" + filename) for filename in os.listdir(file) for jpgname in
