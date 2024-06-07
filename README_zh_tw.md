@@ -27,13 +27,16 @@
 ## 未來方向
 - [x] 輸入支援Camera
 - [x] 支援`chose_rtsp`、`load_rtsp`函數
-- [ ] 顯示目標數量變化的圖表
+- [x] 支持拖移檔案輸入
 - [x] 新增了資料夾(批次)檢測功能
 - [x] 目標追蹤
 - [x] 實例分割
 - [ ] 監控系統硬體使用情況
+- [ ] 顯示目標數量變化的圖表
 
 ## 參考文獻
 - [PyQt5-YOLOv5](https://github.com/Javacr/PyQt5-YOLOv5)
 - [ultralytics](https://github.com/ultralytics/ultralytics)
 - [PySide6-YOLOv8](https://github.com/Jai-wei/YOLOv8-PySide6-GUI/tree/main)
+- [YOLOSHOW](https://github.com/SwimmingLiu/YOLOSHOW/tree/31644373fca58aefcc9dba72a610c92031e5331b)
+
