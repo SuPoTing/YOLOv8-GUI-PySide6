@@ -25,13 +25,21 @@
 - The UI design file is `home.ui`, if you modify it, you need to use the `pyside6-uic home.ui > ui/home.py` command to regenerate the `.py` file
 - The resource file is `resources.qrc`, if you modify the default icon, you need to use the `pyside6-rcc resoures.qrc > ui/resources_rc.py` command to regenerate the `.py` file
 
+## Existing Features
+### 1. Mode Selection
+- Image Classification
+- Object Detection
+- Pose Estimation
+- Instance Segmentation
+- Object Tracking
+### 2. Data Input Methods
+- Single File Detection
+- Folder(batch) detection function
+- Support Dragging File Input
+- Camera Input Support
+- Support for 'chose_rtsp' and 'load_rtsp' Functions
+
 ## To Do
-- [x] The input source supports camera
-- [x] Support `chose_rtsp`、`load_rtsp` function in `main.py`
-- [X] Support Dragging File Input
-- [x] Added folder(batch) detection function
-- [x] Target tracking
-- [x] Instance segmentation
 - [ ] Monitor system hardware usage
 - [ ] Graph showing changes in target quantity
 
