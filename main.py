@@ -375,7 +375,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if not os.path.exists(open_fold):
             open_fold = os.getcwd()
         
-        FolderPath = QFileDialog.getExistingDirectory(self, 'Select your Folder', open_fold)
+        FolderPath = QFileDialog.getExistingDirectory(self, '選擇資料夾', open_fold)
         
         # 如果用戶選擇了檔案
         if FolderPath:
