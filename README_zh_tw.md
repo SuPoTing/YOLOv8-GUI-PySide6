@@ -24,13 +24,17 @@
 - UI設計檔為`home.ui`，如果修改，需要使用`pyside6-uic home.ui > ui/home.py`指令重新產生`.py`檔案
 - 資源檔案為`resources.qrc`，如果修改預設icon，需要使用`pyside6-rcc resoures.qrc > ui/resources_rc.py`指令重新產生`.py`檔案
 
-## 未來方向
+## 現有功能
+- [x] 新增了資料夾(批次)檢測功能
+- [x] 支持拖移檔案輸入
 - [x] 輸入支援Camera
 - [x] 支援`chose_rtsp`、`load_rtsp`函數
-- [x] 支持拖移檔案輸入
-- [x] 新增了資料夾(批次)檢測功能
+- [x] 影像分類
+- [x] 物體偵測
+- [x] 姿態檢測
 - [x] 目標追蹤
 - [x] 實例分割
+## 未來方向
 - [ ] 監控系統硬體使用情況
 - [ ] 顯示目標數量變化的圖表
 
