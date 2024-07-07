@@ -9,7 +9,7 @@
 
 ## How to Run
 - `python>=3.8`
-- `pip install ultralytics==8.2.22`
+- `pip install ultralytics==8.2.50`
 - `pip install pyside6`
 - `pip install chardet`
 - `pip install torch==2.0.1 torchvision==0.15.2 torchaudio==2.0.2 --index-url https://download.pytorch.org/whl/cu118`
@@ -19,7 +19,7 @@
 
 ## Notice
 - `ultralytics` follows the `GPL-3.0`, if you need commercial use, you need to obtain its license.
-- If you expect to use your own model, you need to use `ultralytics` to train the yolov5/8/9 model first, and then put the trained `.pt` file into the `models/*` folder.
+- If you expect to use your own model, you need to use `ultralytics` to train the yolov5/8/9(det & seg)/10(only det) model first, and then put the trained `.pt` file into the `models/*` folder.
 - There are still some bugs in the software, and I will continue to optimize and add some more interesting functions as my time allows.
 - If you check the save results, they will be saved in the `./run` path
 - The UI design file is `home.ui`, if you modify it, you need to use the `pyside6-uic home.ui > ui/home.py` command to regenerate the `.py` file
