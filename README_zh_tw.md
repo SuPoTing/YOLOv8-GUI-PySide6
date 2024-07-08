@@ -1,7 +1,7 @@
 # YoloSide ~ A GUI For YOLOv8 `V2.4`
 ---
 <p align="center"> 
-  <a href="https://github.com/NKUST-LEE-LAB/YOLOv8-Pyside6-GUI/blob/%E5%BD%B1%E7%89%87%E5%81%B5%E6%B8%AC%E6%88%AA%E5%9C%96v1/README.md"> English</a> &nbsp; | &nbsp; 繁體中文</a>
+  <a href="https://github.com/SuPoTing/YOLOv8-GUI-PySide6/blob/main/README.md"> English</a> &nbsp; | &nbsp; 繁體中文</a>
  </p>
 
 ![](preview_ui.png)
