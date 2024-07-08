@@ -27,7 +27,6 @@ import re
 import time
 import json
 import torch
-import copy
 import cv2
 import os
 
