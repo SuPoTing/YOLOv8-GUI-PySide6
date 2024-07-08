@@ -27,6 +27,7 @@ import re
 import time
 import json
 import torch
+import copy
 import cv2
 import os
 
@@ -78,6 +79,7 @@ class YoloPredictor(BasePredictor, QObject):
 
         # 如果設置已完成，可以使用以下屬性
         self.model = None
+        self.task_frist = ''
         self.data = self.args.data  # data_dict
         self.imgsz = None
         self.device = None
@@ -105,11 +107,13 @@ class YoloPredictor(BasePredictor, QObject):
                 LOGGER.info('')
             # Setup model
             self.yolo2main_status_msg.emit('模型載入中...')
+
             if not self.model:
                 if self.task == 'Track':
                     track_model = YOLO(self.new_model_name)
                 self.setup_model(self.new_model_name)
                 self.used_model_name = self.new_model_name
+
             with self._lock:  # for thread-safe inference
                 if self.task == 'Track':
                     track_history = defaultdict(lambda: [])
@@ -143,6 +147,12 @@ class YoloPredictor(BasePredictor, QObject):
                         self.setup_model(self.new_model_name)
                         self.used_model_name = self.new_model_name
 
+                    if 'obb' in self.used_model_name and self.task == 'Detect':
+                        self.task = 'obb'
+                        self.task_frist = 'Detect'
+                    if self.task == 'obb' and 'obb' not in self.used_model_name:
+                        self.task = self.task_frist
+
                     # 暫停開關
                     if self.continue_dtc:
                         try:
@@ -169,6 +179,8 @@ class YoloPredictor(BasePredictor, QObject):
                                 self.results = self.classify_postprocess(preds, im, im0s)
                             elif self.task == 'Detect':
                                 self.results = self.postprocess(preds, im, im0s)
+                            elif self.task == 'obb':
+                                self.results = self.obb_postprocess(preds, im, im0s)
                             elif self.task == 'Segment':
                                 self.results = self.segment_postprocess(preds, im, im0s)
                             elif self.task == 'Pose':
@@ -280,6 +292,31 @@ class YoloPredictor(BasePredictor, QObject):
             pred[:, :4] = ops.scale_boxes(img.shape[2:], pred[:, :4], orig_img.shape)
             img_path = self.batch[0][i]
             results.append(Results(orig_img, path=img_path, names=self.model.names, boxes=pred))
+        return results
+
+    def obb_postprocess(self, preds, img, orig_imgs):
+        """Post-processes predictions and returns a list of Results objects."""
+        preds = ops.non_max_suppression(
+            preds,
+            self.conf_thres,
+            self.iou_thres,
+            agnostic=self.args.agnostic_nms,
+            max_det=self.args.max_det,
+            nc=len(self.model.names),
+            classes=self.args.classes,
+            rotated=True,
+        )
+
+        if not isinstance(orig_imgs, list):  # input images are a torch.Tensor, not a list
+            orig_imgs = ops.convert_torch2numpy_batch(orig_imgs)
+
+        results = []
+        for pred, orig_img, img_path in zip(preds, orig_imgs, self.batch[0]):
+            rboxes = ops.regularize_rboxes(torch.cat([pred[:, :4], pred[:, -1:]], dim=-1))
+            rboxes[:, :4] = ops.scale_boxes(img.shape[2:], rboxes[:, :4], orig_img.shape, xywh=True)
+            # xywh, r, conf, cls
+            obb = torch.cat([rboxes, pred[:, 4:6]], dim=-1)
+            results.append(Results(orig_img, path=img_path, names=self.model.names, obb=obb))
         return results
 
     def classify_preprocess(self, img):
@@ -465,8 +502,17 @@ class YoloPredictor(BasePredictor, QObject):
             prob = result.probs
             # for c in prob.top5:
             #     print(c)
-        else:
+        elif self.task not in ['Classify', 'obb']:
             det = result.boxes
+            if len(det) == 0:
+                string += f"(no detections)"
+
+            for c in det.cls.unique():
+                n = (det.cls == c).sum()  # detections per class
+                self.target_nums += int(n)
+                self.class_nums += 1
+        elif self.task == 'obb':
+            det = result.obb
             if len(det) == 0:
                 string += f"(no detections)"
 
