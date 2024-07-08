@@ -8,7 +8,7 @@
 
 ## 環境配置
 - `python>=3.8`
-- `pip install ultralytics==8.2.22`
+- `pip install ultralytics==8.2.50`
 - `pip install pyside6`
 - `pip install chardet`
 - `pip install torch==2.0.1 torchvision==0.15.2 torchaudio==2.0.2 --index-url https://download.pytorch.org/whl/cu118`
@@ -23,11 +23,13 @@
 - 如果您有儲存檢測結果，它們將保存在`./run`路徑中
 - UI設計檔為`home.ui`，如果修改，需要使用`pyside6-uic home.ui > ui/home.py`指令重新產生`.py`檔案
 - 資源檔案為`resources.qrc`，如果修改預設icon，需要使用`pyside6-rcc resoures.qrc > ui/resources_rc.py`指令重新產生`.py`檔案
+- 旋轉框模式在`Detect mode`，如果要使用自己訓練的obb模型，需要在檔名中加`obb`，如`yolov8n-obb.pt`，未加obb只會進入一般偵測模式
 
 ## 現有功能
 ### 1.模式選擇
 - 影像分類
 - 物體偵測
+- 物體偵測(OBB)
 - 姿態檢測
 - 實例分割
 - 目標追蹤
