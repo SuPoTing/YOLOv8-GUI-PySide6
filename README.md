@@ -14,7 +14,7 @@
 Create a virtual environment equipped with python version 3.10, then activate environment. 
 
 ```shell
-conda create -n yolov8-gui python=3.10
+conda create --name yolov8-gui python=3.10
 conda activate yolov8-gui
 ```
 ### 2. Install Pytorch frame 
