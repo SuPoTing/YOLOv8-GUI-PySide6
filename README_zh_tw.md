@@ -6,15 +6,33 @@
 
 ![](preview_ui.png)
 
-## 環境配置
-- `python>=3.8`
-- `pip install ultralytics==8.2.50`
-- `pip install pyside6`
-- `pip install chardet`
-- `pip install torch==2.0.1 torchvision==0.15.2 torchaudio==2.0.2 --index-url https://download.pytorch.org/whl/cu118`
-- `python main.py or python main_en.py`
+## 實驗環境
+### 1. 建立虛擬環境
 
-#### !!必須安裝對應版本套件包
+建立一個python3.10版本的虛擬環境，然後啟動環境。
+
+```shell
+conda create --name yolov8-gui python=3.10
+conda activate yolov8-gui
+```
+### 2. 安裝依賴套件包
+
+```shell
+pip install pyside6
+pip install chardet
+pip install ultralytics==8.2.50
+pip install torch==2.0.1 torchvision==0.15.2 torchaudio==2.0.2 --index-url https://download.pytorch.org/whl/cu118
+```
+
+### 3. 執行程式
+- 繁體中文
+```shell
+python main.py
+```
+- 英文
+```shell
+python main_en.py
+```
 
 ## 注意事項
 - `ultralytics`遵循`GPL-3.0`，如果需要商業用途，需要取得其license。
