@@ -27,11 +27,14 @@ pip install torch==2.0.1 torchvision==0.15.2 torchaudio==2.0.2 --index-url https
 ```
 
 ### 3. Run Program
-
+- Traditional Chinese
 ```shell
-python main.py or python main_en.py
+python main.py
 ```
-
+- English
+```shell
+python main_en.py
+```
 ## Notice
 - `ultralytics` follows the `GPL-3.0`, if you need commercial use, you need to obtain its license.
 - If you expect to use your own model, you need to use `ultralytics` to train the yolov5/6(only det)/8/9(det&seg)/10(only det) model first, and then put the trained `.pt` file into the `models/*` folder.
