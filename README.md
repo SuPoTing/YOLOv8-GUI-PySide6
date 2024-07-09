@@ -8,12 +8,29 @@
 ![](preview_en.png)
 
 ## How to Run
-- `python>=3.8`
-- `pip install ultralytics==8.2.50`
-- `pip install pyside6`
-- `pip install chardet`
-- `pip install torch==2.0.1 torchvision==0.15.2 torchaudio==2.0.2 --index-url https://download.pytorch.org/whl/cu118`
 - `python main.py or python main_en.py`
+### 1. Create virtual environment
+
+Create a virtual environment equipped with python version 3.10, then activate environment. 
+
+```shell
+conda create -n yolov8-gui python=3.10
+conda activate yolov8-gui
+```
+### 2. Install Pytorch frame 
+
+```shell
+pip install pyside6
+pip install chardet
+pip install ultralytics==8.2.50
+pip install torch==2.0.1 torchvision==0.15.2 torchaudio==2.0.2 --index-url https://download.pytorch.org/whl/cu118
+```
+
+### 3. Run Program
+
+```shell
+python main.py or python main_en.py
+```
 
 #### !!The corresponding version of the library must be installed
 
