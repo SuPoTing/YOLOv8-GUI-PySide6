@@ -4,7 +4,7 @@
   <a href="https://github.com/SuPoTing/YOLOv8-GUI-PySide6/blob/main/README.md"> English</a> &nbsp; | &nbsp; 繁體中文</a>
  </p>
 
-![](preview_ui.png)
+![](UI.png)
 
 ## 實驗環境
 ### 1. 建立虛擬環境
