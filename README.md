@@ -8,7 +8,6 @@
 ![](preview_en.png)
 
 ## How to Run
-- `python main.py or python main_en.py`
 ### 1. Create virtual environment
 
 Create a virtual environment equipped with python version 3.10, then activate environment. 
