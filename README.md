@@ -5,7 +5,7 @@
  </p>
 
 
-![](preview_en.png)
+![](UI_en.png)
 
 ## How to Run
 ### 1. Create virtual environment
