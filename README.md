@@ -17,7 +17,7 @@ Create a virtual environment equipped with python version 3.10, then activate en
 conda create --name yolov8-gui python=3.10
 conda activate yolov8-gui
 ```
-### 2. Install Pytorch frame 
+### 2. Install dependency packages 
 
 ```shell
 pip install pyside6
