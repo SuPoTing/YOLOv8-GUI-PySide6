@@ -37,7 +37,7 @@ python main_en.py
 ## 打包
 ### 1. 建立虛擬環境
 
-推薦使用原生python建立虛擬環境，安裝python3.10
+推薦使用原生Python建立虛擬環境，安裝python3.10
 ```shell
 python -m venv venv
 (your YOLOv8-GUI-PySide6-main PATH)\venv\Scripts\activate.bat
