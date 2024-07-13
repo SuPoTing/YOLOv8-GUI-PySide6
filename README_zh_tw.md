@@ -34,6 +34,50 @@ python main.py
 python main_en.py
 ```
 
+## 打包
+### 1. 建立虛擬環境
+
+推薦使用原生python建立虛擬環境，安裝python3.10
+```shell
+python -m venv venv
+(your YOLOv8-GUI-PySide6-main PATH)\venv\Scripts\activate.bat
+```
+
+### 2. 安裝依賴套件包
+
+```shell
+pip install pyside6
+pip install chardet
+pip install ultralytics==8.2.50
+pip install torch==2.0.1 torchvision==0.15.2 torchaudio==2.0.2 --index-url https://download.pytorch.org/whl/cu118
+pip install auto-py-to-exe
+```
+
+### 3. 啟動auto-py-to-exe UI介面
+
+```shell
+auto-py-to-exe
+```
+
+### 4. 添加腳本位置以及附加檔案
+
+腳本位置
+```shell
+(your YOLOv8-GUI-PySide6-main PATH)\main.py
+```
+
+附加檔案點選新增目綠
+```shell
+(your YOLOv8-GUI-PySide6-main PATH)\venv\Lib\site-packages\ultralytics
+```
+
+點選轉換
+
+### 5. 複製檔案
+將`conig`、`img`、`models`、`ui`、`utils`複製到`(your YOLOv8-GUI-PySide6-main PATH)\output\main`
+
+### 6. 啟動main.exe
+
 ## 注意事項
 - `ultralytics`遵循`GPL-3.0`，如果需要商業用途，需要取得其license。
 - 如果您希望使用自己的model，則需要先使用`ultralytics`訓練yolov5/6(only det)/8/9(det&seg)/10(only det)的model，然後將訓練好的`.pt`檔案放入`models/*`資料夾中。
