@@ -34,6 +34,52 @@ python main.py
 ```shell
 python main_en.py
 ```
+
+## Packaging
+### 1. Create virtual environment
+
+It is recommended to use native Python to create a virtual environment and install Python 3.10.
+```shell
+python -m venv venv
+(your YOLOv8-GUI-PySide6-main PATH)\venv\Scripts\activate.bat
+```
+
+### 2. Install dependency packages 
+
+```shell
+pip install pyside6
+pip install chardet
+pip install ultralytics==8.2.50
+pip install torch==2.0.1 torchvision==0.15.2 torchaudio==2.0.2 --index-url https://download.pytorch.org/whl/cu118
+pip install auto-py-to-exe
+```
+
+### 3. Launch the auto-py-to-exe UI
+
+```shell
+auto-py-to-exe
+```
+
+### 4. Add Script Location and Additional Files
+
+Script Location
+```shell
+(your YOLOv8-GUI-PySide6-main PATH)\main.py
+```
+
+Add additional directories by clicking "Add Folder".
+```shell
+(your YOLOv8-GUI-PySide6-main PATH)\venv\Lib\site-packages\ultralytics
+```
+
+Click "Convert".
+
+### 5. Copy Files
+Copy the config, img, models, ui, and utils directories to (your YOLOv8-GUI-PySide6-main PATH)\output\main.
+
+### 6. Launch main.exe
+Run main.exe to start the application.
+
 ## Notice
 - `ultralytics` follows the `GPL-3.0`, if you need commercial use, you need to obtain its license.
 - If you expect to use your own model, you need to use `ultralytics` to train the yolov5/6(only det)/8/9(det&seg)/10(only det) model first, and then put the trained `.pt` file into the `models/*` folder.
