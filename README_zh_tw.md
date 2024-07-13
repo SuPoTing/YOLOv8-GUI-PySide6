@@ -77,6 +77,7 @@ auto-py-to-exe
 將`conig`、`img`、`models`、`ui`、`utils`複製到`(your YOLOv8-GUI-PySide6-main PATH)\output\main`
 
 ### 6. 啟動main.exe
+運行main.exe以啟動應用程式。
 
 ## 注意事項
 - `ultralytics`遵循`GPL-3.0`，如果需要商業用途，需要取得其license。
