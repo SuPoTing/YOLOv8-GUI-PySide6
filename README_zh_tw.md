@@ -112,4 +112,3 @@ auto-py-to-exe
 - [ultralytics](https://github.com/ultralytics/ultralytics)
 - [PySide6-YOLOv8](https://github.com/Jai-wei/YOLOv8-PySide6-GUI/tree/main)
 - [YOLOSHOW](https://github.com/SwimmingLiu/YOLOSHOW/tree/31644373fca58aefcc9dba72a610c92031e5331b)
-
