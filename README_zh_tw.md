@@ -25,11 +25,11 @@ pip install torch==2.0.1 torchvision==0.15.2 torchaudio==2.0.2 --index-url https
 ```
 
 ### 3. 執行程式
-- 繁體中文
+繁體中文
 ```shell
 python main.py
 ```
-- 英文
+英文
 ```shell
 python main_en.py
 ```
@@ -61,17 +61,17 @@ auto-py-to-exe
 
 ### 4. 添加腳本位置以及附加檔案
 
-- 腳本位置
+腳本位置
 ```shell
 (your YOLOv8-GUI-PySide6-main PATH)\main.py
 ```
 
-- 附加檔案點選新增目綠
+附加檔案點選新增目綠
 ```shell
 (your YOLOv8-GUI-PySide6-main PATH)\venv\Lib\site-packages\ultralytics
 ```
 
-- 點選轉換
+點選轉換
 
 ### 5. 複製檔案
 將`conig`、`img`、`models`、`ui`、`utils`複製到`(your YOLOv8-GUI-PySide6-main PATH)\output\main`
