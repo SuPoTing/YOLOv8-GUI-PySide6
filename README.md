@@ -26,11 +26,11 @@ pip install torch==2.0.1 torchvision==0.15.2 torchaudio==2.0.2 --index-url https
 ```
 
 ### 3. Run Program
-- Traditional Chinese
+Traditional Chinese
 ```shell
 python main.py
 ```
-- English
+English
 ```shell
 python main_en.py
 ```
