@@ -61,17 +61,17 @@ auto-py-to-exe
 
 ### 4. 添加腳本位置以及附加檔案
 
-腳本位置
+- 腳本位置
 ```shell
 (your YOLOv8-GUI-PySide6-main PATH)\main.py
 ```
 
-附加檔案點選新增目綠
+- 附加檔案點選新增目綠
 ```shell
 (your YOLOv8-GUI-PySide6-main PATH)\venv\Lib\site-packages\ultralytics
 ```
 
-點選轉換
+- 點選轉換
 
 ### 5. 複製檔案
 將`conig`、`img`、`models`、`ui`、`utils`複製到`(your YOLOv8-GUI-PySide6-main PATH)\output\main`
