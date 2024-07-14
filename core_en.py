@@ -1,4 +1,4 @@
-####################ultralytics==8.2.22####################
+####################ultralytics==8.2.50####################
 ####################cuda11.8####################
 from ultralytics.utils.torch_utils import select_device, smart_inference_mode
 from ultralytics.engine.predictor import BasePredictor
