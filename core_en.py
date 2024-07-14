@@ -78,6 +78,7 @@ class YoloPredictor(BasePredictor, QObject):
 
         # Properties that can be used once setup is completed
         self.model = None
+        self.task_frist = ''
         self.data = self.args.data  # data_dict
         self.imgsz = None
         self.device = None
