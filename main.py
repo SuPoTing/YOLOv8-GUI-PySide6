@@ -1083,8 +1083,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                           "rate": rate,
                           "save_res": self.save_res,
                           "save_txt": self.save_txt,
-                          "save_res": self.save_res_cam,
-                          "save_txt": self.save_txt_cam
+                          "save_res_cam": self.save_res_cam,
+                          "save_txt_cam": self.save_txt_cam
                           }
             new_json = json.dumps(new_config, ensure_ascii=False, indent=2)
             with open(config_file, 'w', encoding='utf-8') as f:
