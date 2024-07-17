@@ -81,7 +81,7 @@ Copy the config, img, models, ui, and utils directories to (your YOLOv8-GUI-PySi
 Run main.exe to start the application.
 
 ## Notice
-- `ultralytics` follows the `GPL-3.0`, if you need commercial use, you need to obtain its license.
+- `ultralytics` follows the `AGPL-3.0`, if you need commercial use, you need to obtain its license.
 - If you expect to use your own model, you need to use `ultralytics` to train the yolov5/6(only det)/8/9(det&seg)/10(only det) model first, and then put the trained `.pt` file into the `models/*` folder.
 - There are still some bugs in the software, and I will continue to optimize and add some more interesting functions as my time allows.
 - If you check the save results, they will be saved in the `./run` path
