@@ -864,7 +864,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.yolo_thread_cam.quit()
             self.stop()
             self.cam_stop()
-
+            
+        self.yolo_predict_cam.stream_buffer = True
         self.content.setCurrentIndex(2)
         self.show_status('目前頁面：rtsp檢測頁面')
         self.rtsp_window = Window()
