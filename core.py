@@ -75,6 +75,7 @@ class YoloPredictor(BasePredictor, QObject):
         self.labels_dict = {}        # 返回檢測結果的字典
         self.progress_value = 0      # 進度條的值
         self.task = ''
+        self.stream_buffer = False
 
         # 如果設置已完成，可以使用以下屬性
         self.model = None
@@ -465,7 +466,7 @@ class YoloPredictor(BasePredictor, QObject):
             source=source,
             batch=self.args.batch,
             vid_stride=self.args.vid_stride,
-            buffer=self.args.stream_buffer,
+            buffer=self.stream_buffer,
         )
 
         self.source_type = self.dataset.source_type
