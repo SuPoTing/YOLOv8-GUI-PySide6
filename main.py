@@ -903,85 +903,52 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     ####################################共用####################################
     # 顯示底部狀態欄信息
     def show_status(self, msg):
-        # 設置狀態欄文字
         self.status_bar.setText(msg)
+        def handle_page_0():
+            if msg == '檢測完成':
+                self.save_res_button.setEnabled(True)
+                self.save_txt_button.setEnabled(True)
+                self.run_button.setChecked(False)
+
+                if self.yolo_thread.isRunning():
+                    self.yolo_thread.quit()
+
+            elif msg == '檢測終止':
+                self.save_res_button.setEnabled(True)
+                self.save_txt_button.setEnabled(True)
+                self.run_button.setChecked(False)
+                self.progress_bar.setValue(0)
+
+                if self.yolo_thread.isRunning():
+                    self.yolo_thread.quit()
+
+                self.pre_video.clear()
+                self.res_video.clear()
+                self.Class_num.setText('--')
+                self.Target_num.setText('--')
+                self.fps_label.setText('--')
+
+        def handle_page_2():
+            if msg == '檢測終止':
+                self.save_res_button_cam.setEnabled(True)
+                self.save_txt_button_cam.setEnabled(True)
+                self.run_button_cam.setChecked(False)
+                self.progress_bar_cam.setValue(0)
+
+                if self.yolo_thread_cam.isRunning():
+                    self.yolo_thread_cam.quit()
+
+                self.pre_cam.clear()
+                self.res_cam.clear()
+                self.Class_num_cam.setText('--')
+                self.Target_num_cam.setText('--')
+                self.fps_label_cam.setText('--')
+
+        # 根據不同的頁面處理不同的狀態
         if self.PageIndex == 0:
-            # 根據不同的狀態信息執行相應的操作
-            if msg == 'Detection completed' or msg == '檢測完成':
-                # 啟用保存結果和保存文本的按鈕
-                self.save_res_button.setEnabled(True)
-                self.save_txt_button.setEnabled(True)
-                
-                # 將檢測開關按鈕設置為未勾選狀態
-                self.run_button.setChecked(False)    
-                
-                # 將進度條的值設置為0
-                self.progress_bar.setValue(0)
-                
-                # 如果 YOLO 線程正在運行，則終止該線程
-                if self.yolo_thread.isRunning():
-                    self.yolo_thread.quit()  # 結束處理
-
-            elif msg == 'Detection terminated!' or msg == '檢測終止':
-                # 啟用保存結果和保存文本的按鈕
-                self.save_res_button.setEnabled(True)
-                self.save_txt_button.setEnabled(True)
-                
-                # 將檢測開關按鈕設置為未勾選狀態
-                self.run_button.setChecked(False)    
-                
-                # 將進度條的值設置為0
-                self.progress_bar.setValue(0)
-                
-                # 如果 YOLO 線程正在運行，則終止該線程
-                if self.yolo_thread.isRunning():
-                    self.yolo_thread.quit()  # 結束處理
-                
-                # 清空影像顯示
-                self.pre_video.clear()  # 清除原始圖像
-                self.res_video.clear()  # 清除檢測結果圖像
-                self.Class_num.setText('--')  # 顯示的類別數目
-                self.Target_num.setText('--')  # 顯示的目標數目
-                self.fps_label.setText('--')  # 顯示的幀率信息
-                
-        if self.PageIndex == 2:
-            # 根據不同的狀態信息執行相應的操作
-            if msg == 'Detection completed' or msg == '檢測完成':
-                # 啟用保存結果和保存文本的按鈕
-                self.save_res_button_cam.setEnabled(True)
-                self.save_txt_button_cam.setEnabled(True)
-                
-                # 將檢測開關按鈕設置為未勾選狀態
-                self.run_button_cam.setChecked(False)    
-                
-                # 將進度條的值設置為0
-                self.progress_bar_cam.setValue(0)
-                
-                # 如果 YOLO 線程正在運行，則終止該線程
-                if self.yolo_thread_cam.isRunning():
-                    self.yolo_thread_cam.quit()  # 結束處理
-
-            elif msg == 'Detection terminated!' or msg == '檢測終止':
-                # 啟用保存結果和保存文本的按鈕
-                self.save_res_button_cam.setEnabled(True)
-                self.save_txt_button_cam.setEnabled(True)
-                
-                # 將檢測開關按鈕設置為未勾選狀態
-                self.run_button_cam.setChecked(False)    
-                
-                # 將進度條的值設置為0
-                self.progress_bar_cam.setValue(0)
-                
-                # 如果 YOLO 線程正在運行，則終止該線程
-                if self.yolo_thread_cam.isRunning():
-                    self.yolo_thread_cam.quit()  # 結束處理
-
-                # 清空影像顯示
-                self.pre_cam.clear()  # 清除原始圖像
-                self.res_cam.clear()  # 清除檢測結果圖像
-                self.Class_num_cam.setText('--')  # 顯示的類別數目
-                self.Target_num_cam.setText('--')  # 顯示的目標數目
-                self.fps_label_cam.setText('--')  # 顯示的幀率信息
+            handle_page_0()
+        elif self.PageIndex == 2:
+            handle_page_2()
 
     # 循環監控模型文件更改
     def ModelBoxRefre(self):
