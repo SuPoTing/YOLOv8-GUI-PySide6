@@ -903,86 +903,52 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     ####################################common####################################
     # Display information in the bottom status bar
     def show_status(self, msg):
-        # Set the text of the status bar
         self.status_bar.setText(msg)
+        def handle_page_0():
+            if msg == 'Detection completed!':
+                self.save_res_button.setEnabled(True)
+                self.save_txt_button.setEnabled(True)
+                self.run_button.setChecked(False)
+
+                if self.yolo_thread.isRunning():
+                    self.yolo_thread.quit()
+
+            elif msg == 'Detection terminated!':
+                self.save_res_button.setEnabled(True)
+                self.save_txt_button.setEnabled(True)
+                self.run_button.setChecked(False)
+                self.progress_bar.setValue(0)
+
+                if self.yolo_thread.isRunning():
+                    self.yolo_thread.quit()
+
+                self.pre_video.clear()
+                self.res_video.clear()
+                self.Class_num.setText('--')
+                self.Target_num.setText('--')
+                self.fps_label.setText('--')
+
+        def handle_page_2():
+            if msg == 'Detection terminated!':
+                self.save_res_button_cam.setEnabled(True)
+                self.save_txt_button_cam.setEnabled(True)
+                self.run_button_cam.setChecked(False)
+                self.progress_bar_cam.setValue(0)
+
+                if self.yolo_thread_cam.isRunning():
+                    self.yolo_thread_cam.quit()
+
+                self.pre_cam.clear()
+                self.res_cam.clear()
+                self.Class_num_cam.setText('--')
+                self.Target_num_cam.setText('--')
+                self.fps_label_cam.setText('--')
+
         if self.PageIndex == 0:
-            # Perform corresponding operations based on different status messages
-            if msg == 'Detection completed!':
-                # Enable the save result and save text buttons
-                self.save_res_button.setEnabled(True)
-                self.save_txt_button.setEnabled(True)
-                
-                # Set the detection switch button to unchecked
-                self.run_button.setChecked(False)    
-                
-                # Set the progress bar value to 0
-                self.progress_bar.setValue(0)
-                
-                # If the YOLO thread is running, terminate it
-                if self.yolo_thread.isRunning():
-                    self.yolo_thread.quit()  # Terminate processing
-
-            elif msg == 'Detection terminated!':
-                # Enable the save result and save text buttons
-                self.save_res_button.setEnabled(True)
-                self.save_txt_button.setEnabled(True)
-                
-                # Set the detection switch button to unchecked
-                self.run_button.setChecked(False)    
-                
-                # Set the progress bar value to 0
-                self.progress_bar.setValue(0)
-                
-                # If the YOLO thread is running, terminate it
-                if self.yolo_thread.isRunning():
-                    self.yolo_thread.quit()  # Terminate processing
-                    
-                # Clear image display
-                self.pre_video.clear()  # Clear original image
-                self.res_video.clear()  # Clear detection result image
-                self.Class_num.setText('--')  # Displayed class number
-                self.Target_num.setText('--')  # Displayed target number
-                self.fps_label.setText('--')  # Displayed frame rate information
-                
-        if self.PageIndex == 2:
-            # Perform corresponding operations based on different status messages
-            if msg == 'Detection completed!':
-                # Enable the save result and save text buttons
-                self.save_res_button_cam.setEnabled(True)
-                self.save_txt_button_cam.setEnabled(True)
-                
-                # Set the detection switch button to unchecked
-                self.run_button_cam.setChecked(False)    
-                
-                # Set the progress bar value to 0
-                self.progress_bar_cam.setValue(0)
-                
-                # If the YOLO thread is running, terminate it
-                if self.yolo_thread_cam.isRunning():
-                    self.yolo_thread_cam.quit()  # Terminate processing
-
-            elif msg == 'Detection terminated!':
-                # Enable the save result and save text buttons
-                self.save_res_button_cam.setEnabled(True)
-                self.save_txt_button_cam.setEnabled(True)
-                
-                # Set the detection switch button to unchecked
-                self.run_button_cam.setChecked(False)    
-                
-                # Set the progress bar value to 0
-                self.progress_bar_cam.setValue(0)
-                
-                # If the YOLO thread is running, terminate it
-                if self.yolo_thread_cam.isRunning():
-                    self.yolo_thread_cam.quit()  # Terminate processing
-
-                # Clear image display
-                self.pre_cam.clear()  # Clear original image
-                self.res_cam.clear()  # Clear detection result image
-                self.Class_num_cam.setText('--')  # Displayed class number
-                self.Target_num_cam.setText('--')  # Displayed target number
-                self.fps_label_cam.setText('--')  # Displayed frame rate information
-
+            handle_page_0()
+        elif self.PageIndex == 2:
+            handle_page_2()
+    
     # Monitor model file changes in a loop
     def ModelBoxRefre(self):
         # Get all model files in the model folder
