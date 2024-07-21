@@ -36,12 +36,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.pushButton_segment.clicked.connect(self.button_segment)
         self.pushButton_track.clicked.connect(self.button_track)
 
-        UIFuncitons.setup_button(self.pushButton_detect, ':/all/img/detect.png', ':/all/img/detect_hover.png')
-        UIFuncitons.setup_button(self.pushButton_pose, ':/all/img/pose.png', ':/all/img/pose_hover.png')
-        UIFuncitons.setup_button(self.pushButton_classify, ':/all/img/classify.png', ':/all/img/classify_hover.png')
-        UIFuncitons.setup_button(self.pushButton_segment, ':/all/img/segment.png', ':/all/img/segment_hover.png')
-        UIFuncitons.setup_button(self.pushButton_track, ':/all/img/track.png', ':/all/img/track_hover.png')
-
         self.src_home_button.setEnabled(False)
         self.src_file_button.setEnabled(False)
         self.src_img_button.setEnabled(False)
