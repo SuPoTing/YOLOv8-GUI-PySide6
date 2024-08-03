@@ -513,7 +513,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     ####################################camera####################################
     def cam_button(self):
-        self.yolo_predict_cam.source = 0
+        self.yolo_predict_cam.source = "0"
         self.show_status('目前頁面：Webcam檢測頁面')
         # 結束image or video線程，節省資源
         if self.yolo_thread.isRunning() or self.yolo_thread_cam.isRunning():
