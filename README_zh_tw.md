@@ -21,6 +21,7 @@ conda activate yolov8-gui
 pip install pyside6
 pip install chardet
 pip install pytube
+pip install numpy==1.26.4
 pip install moviepy==1.0.3
 pip install ultralytics==8.2.66
 pip install torch==2.0.1 torchvision==0.15.2 torchaudio==2.0.2 --index-url https://download.pytorch.org/whl/cu118
