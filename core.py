@@ -309,6 +309,9 @@ class YoloPredictor(BasePredictor, QObject):
                     self.duration = int(clip.duration)  # 影片長度（秒）
                     self.total_hours, self.total_minutes, self.total_seconds = seconds_to_hms(self.duration)
                     # print(f"影片長度：{self.total_hours}:{self.total_minutes:02}:{self.total_seconds:02}")
+            else:
+                self.duration = 1
+                self.total_hours, self.total_minutes, self.total_seconds = '', '', ''
         else:
             self.duration = 1
             self.total_hours, self.total_minutes, self.total_seconds = '', '', ''
