@@ -1,11 +1,11 @@
-# YOLOv8-GUI-PySide6 `V2.4-alpha` a GUI For Ultralytics
+# YOLOv8-GUI-PySide6 `V2.4` a GUI For Ultralytics
 ---
   <p align="center"> 
   English &nbsp; | &nbsp; <a href="https://github.com/SuPoTing/YOLOv8-GUI-PySide6/blob/main/README_zh_tw.md">繁體中文</a>
  </p>
 
 
-![](./img/preview_en.png)
+![](UI_en.png)
 
 ## How to Run
 ### 1. Create virtual environment
