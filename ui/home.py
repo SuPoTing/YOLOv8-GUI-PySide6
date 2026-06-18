@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'home.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.7.2
+## Created by: Qt User Interface Compiler version 6.11.1
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -17,9 +17,9 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QCheckBox, QComboBox, QDoubleSpinBox,
     QFrame, QGridLayout, QHBoxLayout, QLabel,
-    QLayout, QMainWindow, QProgressBar, QPushButton,
-    QSizePolicy, QSlider, QSpacerItem, QSpinBox,
-    QSplitter, QStackedWidget, QVBoxLayout, QWidget)
+    QLayout, QMainWindow, QPushButton, QSizePolicy,
+    QSlider, QSpacerItem, QSpinBox, QSplitter,
+    QStackedWidget, QVBoxLayout, QWidget)
 import ui.resources_rc
 
 class Ui_MainWindow(object):
@@ -64,7 +64,7 @@ class Ui_MainWindow(object):
         self.TopLogoInfo.setEnabled(True)
         self.TopLogoInfo.setMinimumSize(QSize(0, 70))
         self.TopLogoInfo.setMaximumSize(QSize(16777215, 70))
-        self.TopLogoInfo.setFrameShape(QFrame.StyledPanel)
+        self.TopLogoInfo.setFrameShape(QFrame.NoFrame)
         self.TopLogoInfo.setFrameShadow(QFrame.Raised)
         self.logo = QWidget(self.TopLogoInfo)
         self.logo.setObjectName(u"logo")
@@ -256,26 +256,26 @@ class Ui_MainWindow(object):
         self.src_home_button.setMinimumSize(QSize(0, 45))
         palette = QPalette()
         brush = QBrush(QColor(255, 255, 255, 199))
-        brush.setStyle(Qt.SolidPattern)
-        palette.setBrush(QPalette.Active, QPalette.WindowText, brush)
-        palette.setBrush(QPalette.Active, QPalette.Text, brush)
-        palette.setBrush(QPalette.Active, QPalette.ButtonText, brush)
+        brush.setStyle(Qt.BrushStyle.SolidPattern)
+        palette.setBrush(QPalette.ColorGroup.Active, QPalette.ColorRole.WindowText, brush)
+        palette.setBrush(QPalette.ColorGroup.Active, QPalette.ColorRole.Text, brush)
+        palette.setBrush(QPalette.ColorGroup.Active, QPalette.ColorRole.ButtonText, brush)
         brush1 = QBrush(QColor(255, 255, 255, 100))
-        brush1.setStyle(Qt.SolidPattern)
+        brush1.setStyle(Qt.BrushStyle.SolidPattern)
 #if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
-        palette.setBrush(QPalette.Active, QPalette.PlaceholderText, brush1)
+        palette.setBrush(QPalette.ColorGroup.Active, QPalette.ColorRole.PlaceholderText, brush1)
 #endif
-        palette.setBrush(QPalette.Inactive, QPalette.WindowText, brush)
-        palette.setBrush(QPalette.Inactive, QPalette.Text, brush)
-        palette.setBrush(QPalette.Inactive, QPalette.ButtonText, brush)
+        palette.setBrush(QPalette.ColorGroup.Inactive, QPalette.ColorRole.WindowText, brush)
+        palette.setBrush(QPalette.ColorGroup.Inactive, QPalette.ColorRole.Text, brush)
+        palette.setBrush(QPalette.ColorGroup.Inactive, QPalette.ColorRole.ButtonText, brush)
 #if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
-        palette.setBrush(QPalette.Inactive, QPalette.PlaceholderText, brush1)
+        palette.setBrush(QPalette.ColorGroup.Inactive, QPalette.ColorRole.PlaceholderText, brush1)
 #endif
-        palette.setBrush(QPalette.Disabled, QPalette.WindowText, brush)
-        palette.setBrush(QPalette.Disabled, QPalette.Text, brush)
-        palette.setBrush(QPalette.Disabled, QPalette.ButtonText, brush)
+        palette.setBrush(QPalette.ColorGroup.Disabled, QPalette.ColorRole.WindowText, brush)
+        palette.setBrush(QPalette.ColorGroup.Disabled, QPalette.ColorRole.Text, brush)
+        palette.setBrush(QPalette.ColorGroup.Disabled, QPalette.ColorRole.ButtonText, brush)
 #if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
-        palette.setBrush(QPalette.Disabled, QPalette.PlaceholderText, brush1)
+        palette.setBrush(QPalette.ColorGroup.Disabled, QPalette.ColorRole.PlaceholderText, brush1)
 #endif
         self.src_home_button.setPalette(palette)
         self.src_home_button.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
@@ -311,7 +311,7 @@ class Ui_MainWindow(object):
         self.VersionInfo.setObjectName(u"VersionInfo")
         self.VersionInfo.setMinimumSize(QSize(200, 10))
         self.VersionInfo.setMaximumSize(QSize(200, 15))
-        self.VersionInfo.setFrameShape(QFrame.StyledPanel)
+        self.VersionInfo.setFrameShape(QFrame.NoFrame)
         self.VersionInfo.setFrameShadow(QFrame.Raised)
         self.verticalLayout_3 = QVBoxLayout(self.VersionInfo)
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
@@ -337,7 +337,7 @@ class Ui_MainWindow(object):
 "border:0px solid red;\n"
 "border-radius:30px\n"
 "}")
-        self.ContentBox.setFrameShape(QFrame.StyledPanel)
+        self.ContentBox.setFrameShape(QFrame.NoFrame)
         self.ContentBox.setFrameShadow(QFrame.Raised)
         self.verticalLayout_6 = QVBoxLayout(self.ContentBox)
         self.verticalLayout_6.setSpacing(0)
@@ -350,7 +350,7 @@ class Ui_MainWindow(object):
         self.top.setStyleSheet(u"QFrame#top{\n"
 "background-color: rgba(255, 255, 255,0);\n"
 "}")
-        self.top.setFrameShape(QFrame.StyledPanel)
+        self.top.setFrameShape(QFrame.NoFrame)
         self.top.setFrameShadow(QFrame.Raised)
         self.horizontalLayout = QHBoxLayout(self.top)
         self.horizontalLayout.setSpacing(0)
@@ -369,7 +369,7 @@ class Ui_MainWindow(object):
         self.buttons_sf.setObjectName(u"buttons_sf")
         self.buttons_sf.setMinimumSize(QSize(120, 30))
         self.buttons_sf.setMaximumSize(QSize(120, 30))
-        self.buttons_sf.setFrameShape(QFrame.StyledPanel)
+        self.buttons_sf.setFrameShape(QFrame.NoFrame)
         self.buttons_sf.setFrameShadow(QFrame.Raised)
         self.horizontalLayout_2 = QHBoxLayout(self.buttons_sf)
         self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
@@ -485,7 +485,7 @@ class Ui_MainWindow(object):
 "border:2px solid rgb(255, 255, 255);\n"
 "border-radius:15px;\n"
 "}")
-        self.QF_Group.setFrameShape(QFrame.StyledPanel)
+        self.QF_Group.setFrameShape(QFrame.NoFrame)
         self.QF_Group.setFrameShadow(QFrame.Raised)
         self.horizontalLayout_3 = QHBoxLayout(self.QF_Group)
         self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
@@ -834,7 +834,7 @@ class Ui_MainWindow(object):
         self.Result_QF = QFrame(self.Page0)
         self.Result_QF.setObjectName(u"Result_QF")
         self.Result_QF.setStyleSheet(u"")
-        self.Result_QF.setFrameShape(QFrame.StyledPanel)
+        self.Result_QF.setFrameShape(QFrame.NoFrame)
         self.Result_QF.setFrameShadow(QFrame.Raised)
         self.verticalLayout_16 = QVBoxLayout(self.Result_QF)
         self.verticalLayout_16.setSpacing(0)
@@ -871,7 +871,7 @@ class Ui_MainWindow(object):
         self.Pause_QF.setObjectName(u"Pause_QF")
         self.Pause_QF.setMinimumSize(QSize(0, 30))
         self.Pause_QF.setMaximumSize(QSize(16777215, 30))
-        self.Pause_QF.setFrameShape(QFrame.StyledPanel)
+        self.Pause_QF.setFrameShape(QFrame.NoFrame)
         self.Pause_QF.setFrameShadow(QFrame.Raised)
         self.horizontalLayout_4 = QHBoxLayout(self.Pause_QF)
         self.horizontalLayout_4.setSpacing(10)
@@ -901,28 +901,51 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_4.addWidget(self.run_button)
 
-        self.progress_bar = QProgressBar(self.Pause_QF)
-        self.progress_bar.setObjectName(u"progress_bar")
-        self.progress_bar.setMinimumSize(QSize(0, 20))
-        self.progress_bar.setMaximumSize(QSize(16777215, 20))
-        self.progress_bar.setStyleSheet(u"QProgressBar{ \n"
-"font: 700 10pt \"Microsoft YaHei UI\";\n"
-"color: rgb(253, 143, 134); \n"
-"text-align:center; \n"
-"border:3px solid rgb(255, 255, 255);\n"
-"border-radius: 10px; \n"
-"background-color: rgba(215, 215, 215,100);\n"
-"} \n"
+        self.video_slider = QSlider(self.Pause_QF)
+        self.video_slider.setObjectName(u"video_slider")
+        sizePolicy1.setHeightForWidth(self.video_slider.sizePolicy().hasHeightForWidth())
+        self.video_slider.setSizePolicy(sizePolicy1)
+        self.video_slider.setStyleSheet(u"            QSlider::groove:horizontal {\n"
+"                height: 5px;\n"
+"                background: #e0e0e0;\n"
+"                border: 1px solid #bbb;\n"
+"                border-radius: 2px;\n"
+"            }\n"
 "\n"
-"QProgressBar:chunk{ \n"
-"border-radius:0px; \n"
-"background: rgba(119, 111, 252, 200);\n"
-"border-radius: 7px;\n"
-"}")
-        self.progress_bar.setMaximum(1000)
-        self.progress_bar.setValue(0)
+"            QSlider::handle:horizontal {\n"
+"                background: rgb(255,150,100);\n"
+"                border: 1px solid rgb(255,150,100);\n"
+"                width: 14px;\n"
+"                height: 14px;\n"
+"                margin: -5px 0;  /* Handle is placed at the center of the groove */\n"
+"                border-radius: 7px;\n"
+"            }\n"
+"\n"
+"            QSlider::sub-page:horizontal {\n"
+"                background: #ff0000;\n"
+"                border: 1px solid #ff0000;\n"
+"                height: 5px;\n"
+"                border-radius: 2px;\n"
+"            }\n"
+"\n"
+"            QSlider::add-page:horizontal {\n"
+"                background: #e0e0e0;\n"
+"                border: 1px solid #bbb;\n"
+"                height: 5px;\n"
+"                border-radius: 2px"
+                        ";\n"
+"            }")
+        self.video_slider.setOrientation(Qt.Horizontal)
 
-        self.horizontalLayout_4.addWidget(self.progress_bar)
+        self.horizontalLayout_4.addWidget(self.video_slider)
+
+        self.time_label = QLabel(self.Pause_QF)
+        self.time_label.setObjectName(u"time_label")
+        self.time_label.setMinimumSize(QSize(107, 15))
+        self.time_label.setMaximumSize(QSize(16777215, 16777215))
+        self.time_label.setStyleSheet(u"font: \"Microsoft YaHei UI\";")
+
+        self.horizontalLayout_4.addWidget(self.time_label)
 
         self.stop_button = QPushButton(self.Pause_QF)
         self.stop_button.setObjectName(u"stop_button")
@@ -1577,7 +1600,6 @@ class Ui_MainWindow(object):
         self.pushButton_detect.setSizePolicy(sizePolicy)
         self.pushButton_detect.setMinimumSize(QSize(200, 200))
         self.pushButton_detect.setMaximumSize(QSize(16777215, 16777215))
-        self.pushButton_detect.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
         self.pushButton_detect.setStyleSheet(u"QPushButton{\n"
 "qproperty-icon: url(:/all/img/detect.png);\n"
 "icon-size: 400px;\n"
@@ -1586,7 +1608,7 @@ class Ui_MainWindow(object):
 "border: none;\n"
 "}\n"
 "\n"
-"QPushButton:hover {\n"
+"QPushButton:hover{\n"
 "\n"
 "}")
         self.pushButton_detect.setIconSize(QSize(300, 300))
@@ -1599,7 +1621,6 @@ class Ui_MainWindow(object):
         self.pushButton_segment.setSizePolicy(sizePolicy)
         self.pushButton_segment.setMinimumSize(QSize(200, 200))
         self.pushButton_segment.setMaximumSize(QSize(16777215, 16777215))
-        self.pushButton_segment.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
         self.pushButton_segment.setLayoutDirection(Qt.LeftToRight)
         self.pushButton_segment.setStyleSheet(u"QPushButton{\n"
 "qproperty-icon: url(:/all/img/segment.png);\n"
@@ -1627,7 +1648,6 @@ class Ui_MainWindow(object):
         self.pushButton_track.setSizePolicy(sizePolicy)
         self.pushButton_track.setMinimumSize(QSize(200, 200))
         self.pushButton_track.setMaximumSize(QSize(16777215, 16777215))
-        self.pushButton_track.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
         self.pushButton_track.setStyleSheet(u"QPushButton{\n"
 "qproperty-icon: url(:/all/img/track.png);\n"
 "icon-size: 400px;\n"
@@ -1649,7 +1669,6 @@ class Ui_MainWindow(object):
         self.pushButton_pose.setSizePolicy(sizePolicy)
         self.pushButton_pose.setMinimumSize(QSize(200, 200))
         self.pushButton_pose.setMaximumSize(QSize(16777215, 16777215))
-        self.pushButton_pose.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
         self.pushButton_pose.setStyleSheet(u"QPushButton{\n"
 "qproperty-icon: url(:/all/img/pose.png);\n"
 "icon-size: 400px;\n"
@@ -1676,7 +1695,6 @@ class Ui_MainWindow(object):
         self.pushButton_classify.setSizePolicy(sizePolicy)
         self.pushButton_classify.setMinimumSize(QSize(200, 200))
         self.pushButton_classify.setMaximumSize(QSize(16777215, 16777215))
-        self.pushButton_classify.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
         self.pushButton_classify.setStyleSheet(u"QPushButton{\n"
 "qproperty-icon: url(:/all/img/classify.png);\n"
 "icon-size: 400px;\n"
@@ -1731,89 +1749,89 @@ class Ui_MainWindow(object):
         self.Class_QF_cam.setMaximumSize(QSize(170, 80))
         palette1 = QPalette()
         brush2 = QBrush(QColor(255, 255, 255, 255))
-        brush2.setStyle(Qt.SolidPattern)
-        palette1.setBrush(QPalette.Active, QPalette.WindowText, brush2)
+        brush2.setStyle(Qt.BrushStyle.SolidPattern)
+        palette1.setBrush(QPalette.ColorGroup.Active, QPalette.ColorRole.WindowText, brush2)
         gradient = QRadialGradient(0, 0, 1, 0.1, 0.1)
-        gradient.setSpread(QGradient.PadSpread)
-        gradient.setCoordinateMode(QGradient.ObjectBoundingMode)
+        gradient.setSpread(QGradient.Spread.PadSpread)
+        gradient.setCoordinateMode(QGradient.CoordinateMode.ObjectBoundingMode)
         gradient.setColorAt(0, QColor(30, 150, 255, 255))
         gradient.setColorAt(1, QColor(50, 100, 255, 255))
         brush3 = QBrush(gradient)
-        palette1.setBrush(QPalette.Active, QPalette.Button, brush3)
-        palette1.setBrush(QPalette.Active, QPalette.Text, brush2)
-        palette1.setBrush(QPalette.Active, QPalette.ButtonText, brush2)
+        palette1.setBrush(QPalette.ColorGroup.Active, QPalette.ColorRole.Button, brush3)
+        palette1.setBrush(QPalette.ColorGroup.Active, QPalette.ColorRole.Text, brush2)
+        palette1.setBrush(QPalette.ColorGroup.Active, QPalette.ColorRole.ButtonText, brush2)
         gradient1 = QRadialGradient(0, 0, 1, 0.1, 0.1)
-        gradient1.setSpread(QGradient.PadSpread)
-        gradient1.setCoordinateMode(QGradient.ObjectBoundingMode)
+        gradient1.setSpread(QGradient.Spread.PadSpread)
+        gradient1.setCoordinateMode(QGradient.CoordinateMode.ObjectBoundingMode)
         gradient1.setColorAt(0, QColor(30, 150, 255, 255))
         gradient1.setColorAt(1, QColor(50, 100, 255, 255))
         brush4 = QBrush(gradient1)
-        palette1.setBrush(QPalette.Active, QPalette.Base, brush4)
+        palette1.setBrush(QPalette.ColorGroup.Active, QPalette.ColorRole.Base, brush4)
         gradient2 = QRadialGradient(0, 0, 1, 0.1, 0.1)
-        gradient2.setSpread(QGradient.PadSpread)
-        gradient2.setCoordinateMode(QGradient.ObjectBoundingMode)
+        gradient2.setSpread(QGradient.Spread.PadSpread)
+        gradient2.setCoordinateMode(QGradient.CoordinateMode.ObjectBoundingMode)
         gradient2.setColorAt(0, QColor(30, 150, 255, 255))
         gradient2.setColorAt(1, QColor(50, 100, 255, 255))
         brush5 = QBrush(gradient2)
-        palette1.setBrush(QPalette.Active, QPalette.Window, brush5)
+        palette1.setBrush(QPalette.ColorGroup.Active, QPalette.ColorRole.Window, brush5)
         brush6 = QBrush(QColor(255, 255, 255, 128))
-        brush6.setStyle(Qt.SolidPattern)
+        brush6.setStyle(Qt.BrushStyle.SolidPattern)
 #if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
-        palette1.setBrush(QPalette.Active, QPalette.PlaceholderText, brush6)
+        palette1.setBrush(QPalette.ColorGroup.Active, QPalette.ColorRole.PlaceholderText, brush6)
 #endif
-        palette1.setBrush(QPalette.Inactive, QPalette.WindowText, brush2)
+        palette1.setBrush(QPalette.ColorGroup.Inactive, QPalette.ColorRole.WindowText, brush2)
         gradient3 = QRadialGradient(0, 0, 1, 0.1, 0.1)
-        gradient3.setSpread(QGradient.PadSpread)
-        gradient3.setCoordinateMode(QGradient.ObjectBoundingMode)
+        gradient3.setSpread(QGradient.Spread.PadSpread)
+        gradient3.setCoordinateMode(QGradient.CoordinateMode.ObjectBoundingMode)
         gradient3.setColorAt(0, QColor(30, 150, 255, 255))
         gradient3.setColorAt(1, QColor(50, 100, 255, 255))
         brush7 = QBrush(gradient3)
-        palette1.setBrush(QPalette.Inactive, QPalette.Button, brush7)
-        palette1.setBrush(QPalette.Inactive, QPalette.Text, brush2)
-        palette1.setBrush(QPalette.Inactive, QPalette.ButtonText, brush2)
+        palette1.setBrush(QPalette.ColorGroup.Inactive, QPalette.ColorRole.Button, brush7)
+        palette1.setBrush(QPalette.ColorGroup.Inactive, QPalette.ColorRole.Text, brush2)
+        palette1.setBrush(QPalette.ColorGroup.Inactive, QPalette.ColorRole.ButtonText, brush2)
         gradient4 = QRadialGradient(0, 0, 1, 0.1, 0.1)
-        gradient4.setSpread(QGradient.PadSpread)
-        gradient4.setCoordinateMode(QGradient.ObjectBoundingMode)
+        gradient4.setSpread(QGradient.Spread.PadSpread)
+        gradient4.setCoordinateMode(QGradient.CoordinateMode.ObjectBoundingMode)
         gradient4.setColorAt(0, QColor(30, 150, 255, 255))
         gradient4.setColorAt(1, QColor(50, 100, 255, 255))
         brush8 = QBrush(gradient4)
-        palette1.setBrush(QPalette.Inactive, QPalette.Base, brush8)
+        palette1.setBrush(QPalette.ColorGroup.Inactive, QPalette.ColorRole.Base, brush8)
         gradient5 = QRadialGradient(0, 0, 1, 0.1, 0.1)
-        gradient5.setSpread(QGradient.PadSpread)
-        gradient5.setCoordinateMode(QGradient.ObjectBoundingMode)
+        gradient5.setSpread(QGradient.Spread.PadSpread)
+        gradient5.setCoordinateMode(QGradient.CoordinateMode.ObjectBoundingMode)
         gradient5.setColorAt(0, QColor(30, 150, 255, 255))
         gradient5.setColorAt(1, QColor(50, 100, 255, 255))
         brush9 = QBrush(gradient5)
-        palette1.setBrush(QPalette.Inactive, QPalette.Window, brush9)
+        palette1.setBrush(QPalette.ColorGroup.Inactive, QPalette.ColorRole.Window, brush9)
 #if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
-        palette1.setBrush(QPalette.Inactive, QPalette.PlaceholderText, brush6)
+        palette1.setBrush(QPalette.ColorGroup.Inactive, QPalette.ColorRole.PlaceholderText, brush6)
 #endif
-        palette1.setBrush(QPalette.Disabled, QPalette.WindowText, brush2)
+        palette1.setBrush(QPalette.ColorGroup.Disabled, QPalette.ColorRole.WindowText, brush2)
         gradient6 = QRadialGradient(0, 0, 1, 0.1, 0.1)
-        gradient6.setSpread(QGradient.PadSpread)
-        gradient6.setCoordinateMode(QGradient.ObjectBoundingMode)
+        gradient6.setSpread(QGradient.Spread.PadSpread)
+        gradient6.setCoordinateMode(QGradient.CoordinateMode.ObjectBoundingMode)
         gradient6.setColorAt(0, QColor(30, 150, 255, 255))
         gradient6.setColorAt(1, QColor(50, 100, 255, 255))
         brush10 = QBrush(gradient6)
-        palette1.setBrush(QPalette.Disabled, QPalette.Button, brush10)
-        palette1.setBrush(QPalette.Disabled, QPalette.Text, brush2)
-        palette1.setBrush(QPalette.Disabled, QPalette.ButtonText, brush2)
+        palette1.setBrush(QPalette.ColorGroup.Disabled, QPalette.ColorRole.Button, brush10)
+        palette1.setBrush(QPalette.ColorGroup.Disabled, QPalette.ColorRole.Text, brush2)
+        palette1.setBrush(QPalette.ColorGroup.Disabled, QPalette.ColorRole.ButtonText, brush2)
         gradient7 = QRadialGradient(0, 0, 1, 0.1, 0.1)
-        gradient7.setSpread(QGradient.PadSpread)
-        gradient7.setCoordinateMode(QGradient.ObjectBoundingMode)
+        gradient7.setSpread(QGradient.Spread.PadSpread)
+        gradient7.setCoordinateMode(QGradient.CoordinateMode.ObjectBoundingMode)
         gradient7.setColorAt(0, QColor(30, 150, 255, 255))
         gradient7.setColorAt(1, QColor(50, 100, 255, 255))
         brush11 = QBrush(gradient7)
-        palette1.setBrush(QPalette.Disabled, QPalette.Base, brush11)
+        palette1.setBrush(QPalette.ColorGroup.Disabled, QPalette.ColorRole.Base, brush11)
         gradient8 = QRadialGradient(0, 0, 1, 0.1, 0.1)
-        gradient8.setSpread(QGradient.PadSpread)
-        gradient8.setCoordinateMode(QGradient.ObjectBoundingMode)
+        gradient8.setSpread(QGradient.Spread.PadSpread)
+        gradient8.setCoordinateMode(QGradient.CoordinateMode.ObjectBoundingMode)
         gradient8.setColorAt(0, QColor(30, 150, 255, 255))
         gradient8.setColorAt(1, QColor(50, 100, 255, 255))
         brush12 = QBrush(gradient8)
-        palette1.setBrush(QPalette.Disabled, QPalette.Window, brush12)
+        palette1.setBrush(QPalette.ColorGroup.Disabled, QPalette.ColorRole.Window, brush12)
 #if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
-        palette1.setBrush(QPalette.Disabled, QPalette.PlaceholderText, brush6)
+        palette1.setBrush(QPalette.ColorGroup.Disabled, QPalette.ColorRole.PlaceholderText, brush6)
 #endif
         self.Class_QF_cam.setPalette(palette1)
         self.Class_QF_cam.setToolTipDuration(0)
@@ -2203,28 +2221,16 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_20.addWidget(self.run_button_cam)
 
-        self.progress_bar_cam = QProgressBar(self.Pause_QF_cam)
-        self.progress_bar_cam.setObjectName(u"progress_bar_cam")
-        self.progress_bar_cam.setMinimumSize(QSize(0, 20))
-        self.progress_bar_cam.setMaximumSize(QSize(16777215, 20))
-        self.progress_bar_cam.setStyleSheet(u"QProgressBar{ \n"
-"font: 700 10pt \"Microsoft YaHei UI\";\n"
-"color: rgb(253, 143, 134); \n"
-"text-align:center; \n"
-"border:3px solid rgb(255, 255, 255);\n"
-"border-radius: 10px; \n"
-"background-color: rgba(215, 215, 215,100);\n"
-"} \n"
-"\n"
-"QProgressBar:chunk{ \n"
-"border-radius:0px; \n"
-"background: rgba(119, 111, 252, 200);\n"
-"border-radius: 7px;\n"
-"}")
-        self.progress_bar_cam.setMaximum(1000)
-        self.progress_bar_cam.setValue(0)
+        self.time_label_cam = QLabel(self.Pause_QF_cam)
+        self.time_label_cam.setObjectName(u"time_label_cam")
+        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        sizePolicy2.setHorizontalStretch(0)
+        sizePolicy2.setVerticalStretch(0)
+        sizePolicy2.setHeightForWidth(self.time_label_cam.sizePolicy().hasHeightForWidth())
+        self.time_label_cam.setSizePolicy(sizePolicy2)
+        self.time_label_cam.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
 
-        self.horizontalLayout_20.addWidget(self.progress_bar_cam)
+        self.horizontalLayout_20.addWidget(self.time_label_cam)
 
         self.stop_button_cam = QPushButton(self.Pause_QF_cam)
         self.stop_button_cam.setObjectName(u"stop_button_cam")
@@ -2859,7 +2865,7 @@ class Ui_MainWindow(object):
         self.below.setObjectName(u"below")
         self.below.setMinimumSize(QSize(0, 30))
         self.below.setMaximumSize(QSize(16777215, 30))
-        self.below.setFrameShape(QFrame.StyledPanel)
+        self.below.setFrameShape(QFrame.NoFrame)
         self.below.setFrameShadow(QFrame.Raised)
         self.horizontalLayout_13 = QHBoxLayout(self.below)
         self.horizontalLayout_13.setObjectName(u"horizontalLayout_13")
@@ -2875,7 +2881,7 @@ class Ui_MainWindow(object):
         self.frame_size_grip.setObjectName(u"frame_size_grip")
         self.frame_size_grip.setMaximumSize(QSize(20, 16777215))
         self.frame_size_grip.setStyleSheet(u"border-radius:30px;")
-        self.frame_size_grip.setFrameShape(QFrame.StyledPanel)
+        self.frame_size_grip.setFrameShape(QFrame.NoFrame)
         self.frame_size_grip.setFrameShadow(QFrame.Raised)
 
         self.horizontalLayout_13.addWidget(self.frame_size_grip)
@@ -2897,7 +2903,7 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
 
         self.ToggleBotton.setDefault(False)
-        self.content.setCurrentIndex(1)
+        self.content.setCurrentIndex(0)
         self.ToggleBotton_6.setDefault(False)
         self.ToggleBotton_2.setDefault(False)
         self.ToggleBotton_3.setDefault(False)
@@ -2921,8 +2927,8 @@ class Ui_MainWindow(object):
         self.src_cam_button.setText(QCoreApplication.translate("MainWindow", u"Camera", None))
         self.src_rtsp_button.setText(QCoreApplication.translate("MainWindow", u"Rtsp", None))
         self.src_home_button.setText(QCoreApplication.translate("MainWindow", u"Home", None))
-        self.VersionLabel.setText(QCoreApplication.translate("MainWindow", u"Version: 2.4", None))
-        self.explain_title.setText(QCoreApplication.translate("MainWindow", u"YOLOv8", None))
+        self.VersionLabel.setText(QCoreApplication.translate("MainWindow", u"Version: 2.5", None))
+        self.explain_title.setText(QCoreApplication.translate("MainWindow", u"YOLOv8 GUI", None))
         self.settings_button.setText("")
         self.min_sf.setText("")
         self.max_sf.setText("")
@@ -2938,6 +2944,7 @@ class Ui_MainWindow(object):
         self.pre_video.setText("")
         self.res_video.setText("")
         self.run_button.setText("")
+        self.time_label.setText("")
         self.stop_button.setText("")
         self.label.setText(QCoreApplication.translate("MainWindow", u"Settings", None))
         self.ToggleBotton_6.setText(QCoreApplication.translate("MainWindow", u"Model", None))
@@ -2964,6 +2971,7 @@ class Ui_MainWindow(object):
         self.pre_cam.setText("")
         self.res_cam.setText("")
         self.run_button_cam.setText("")
+        self.time_label_cam.setText("")
         self.stop_button_cam.setText("")
         self.label_cam.setText(QCoreApplication.translate("MainWindow", u"Settings", None))
         self.ToggleBotton_10.setText(QCoreApplication.translate("MainWindow", u"Model", None))
@@ -2976,3 +2984,4 @@ class Ui_MainWindow(object):
         self.save_txt_button_cam.setText(QCoreApplication.translate("MainWindow", u"Save Labels(.txt)", None))
         self.status_bar.setText(QCoreApplication.translate("MainWindow", u"\u6b61\u8fce\u4f7f\u7528YOLOv8\u6aa2\u6e2c\u7cfb\u7d71\uff0c\u8acb\u9078\u64c7Mode", None))
     # retranslateUi
+
