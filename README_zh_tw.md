@@ -1,4 +1,4 @@
-# YOLOv8-GUI-PySide6 `V2.5` a GUI For Ultralytics
+# Ultralytics-GUI-PySide6 `V2.5` a GUI For Ultralytics
 ---
 <p align="center"> 
   <a href="https://github.com/SuPoTing/YOLOv8-GUI-PySide6/blob/main/README.md"> English</a> &nbsp; | &nbsp; 繁體中文</a>
