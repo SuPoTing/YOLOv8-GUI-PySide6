@@ -66,7 +66,7 @@ Copy the `.\venv\Lib\site-packages\ultralytics` folder into the newly generated 
 
 ### 4. Run main.exe
 
-Navigate into the .dist directory and execute main.exe to run the application.
+Navigate into the `.dist` directory and execute `main.exe` to run the application.
 
 ## Important Notes
 - `ultralytics` is licensed under the `AGPL-3.0` terms. If you intend to use it for commercial purposes, an official license must be acquired from Ultralytics.
