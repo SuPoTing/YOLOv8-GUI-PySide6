@@ -1,7 +1,7 @@
 # Ultralytics-Pyside6-GUI `V2.5` a GUI for Ultralytics
 ---
 <p align="center"> 
-  <a href="https://github.com/SuPoTing/YOLOv8-GUI-PySide6/blob/v2.5/README.md"> English</a> &nbsp; | &nbsp; 繁體中文</a>
+  <a href="https://github.com/SuPoTing/Ultralytics-GUI-PySide6/blob/v2.5/README.md"> English</a> &nbsp; | &nbsp; 繁體中文</a>
  </p>
 
 ![](./img/preview.png)
