@@ -34,7 +34,7 @@
      <widget class="QFrame" name="Main_QF">
       <property name="styleSheet">
        <string notr="true">QFrame#Main_QF{
-      background-color: qlineargradient(x0:0, y0:1, x1:1, y1:1,stop:0.4  rgb(0, 0, 100), stop:1 rgb(10, 50, 200));
+	background-color: qlineargradient(x0:0, y0:1, x1:1, y1:1,stop:0.4  rgb(120, 205, 200), stop:1 rgb(5, 150, 229));
 border:0px solid red;
 border-radius:30px
 }</string>
@@ -71,7 +71,7 @@ border-radius:30px
          </property>
          <property name="styleSheet">
           <string notr="true">QFrame#LeftMenuBg{
-      background-color: rgba(255, 255, 255,0);
+	background-color: rgba(255, 255, 255,0);
 border:0px solid red;
 border-radius:30px
 }</string>
@@ -113,7 +113,7 @@ border-radius:30px
              </size>
             </property>
             <property name="frameShape">
-             <enum>QFrame::StyledPanel</enum>
+             <enum>QFrame::NoFrame</enum>
             </property>
             <property name="frameShadow">
              <enum>QFrame::Raised</enum>
@@ -650,7 +650,7 @@ background-color: rgba(114, 129, 214, 59);
              </size>
             </property>
             <property name="frameShape">
-             <enum>QFrame::StyledPanel</enum>
+             <enum>QFrame::NoFrame</enum>
             </property>
             <property name="frameShadow">
              <enum>QFrame::Raised</enum>
@@ -672,7 +672,7 @@ background-color: rgba(114, 129, 214, 59);
 color: rgba(255, 255, 255, 199);</string>
                </property>
                <property name="text">
-                <string>Version: 2.0</string>
+                <string>Version: 2.5</string>
                </property>
                <property name="alignment">
                 <set>Qt::AlignCenter</set>
@@ -689,13 +689,13 @@ color: rgba(255, 255, 255, 199);</string>
         <widget class="QFrame" name="ContentBox">
          <property name="styleSheet">
           <string notr="true">QFrame#ContentBox{
-      background-color: rgb(245, 249, 254);
+	background-color: rgb(245, 249, 254);
 border:0px solid red;
 border-radius:30px
 }</string>
          </property>
          <property name="frameShape">
-          <enum>QFrame::StyledPanel</enum>
+          <enum>QFrame::NoFrame</enum>
          </property>
          <property name="frameShadow">
           <enum>QFrame::Raised</enum>
@@ -736,7 +736,7 @@ background-color: rgba(255, 255, 255,0);
 }</string>
             </property>
             <property name="frameShape">
-             <enum>QFrame::StyledPanel</enum>
+             <enum>QFrame::NoFrame</enum>
             </property>
             <property name="frameShadow">
              <enum>QFrame::Raised</enum>
@@ -772,7 +772,7 @@ background-color: rgba(255, 255, 255,0);
                 <string notr="true">font: 700 italic 11pt &quot;Segoe UI&quot;;</string>
                </property>
                <property name="text">
-                <string>YOLOv8</string>
+                <string>YOLOv8 GUI</string>
                </property>
                <property name="alignment">
                 <set>Qt::AlignCenter</set>
@@ -794,7 +794,7 @@ background-color: rgba(255, 255, 255,0);
                 </size>
                </property>
                <property name="frameShape">
-                <enum>QFrame::StyledPanel</enum>
+                <enum>QFrame::NoFrame</enum>
                </property>
                <property name="frameShadow">
                 <enum>QFrame::Raised</enum>
@@ -856,17 +856,17 @@ QPushButton:hover{
                   </property>
                   <property name="styleSheet">
                    <string notr="true">QPushButton{
-      
-      background-color: rgb(4, 180, 0);
+	
+	background-color: rgb(4, 180, 0);
 border:1px solid rgba(113, 17, 15,50);
 border-radius:6px;
 }
 QPushButton:hover {
 background-color:rgb(139, 29, 31)
-      
+	
 }
 QPushButton:pressed {
-      background-color: rgb(232, 59, 35);
+	background-color: rgb(232, 59, 35);
 }
 </string>
                   </property>
@@ -891,17 +891,17 @@ QPushButton:pressed {
                   </property>
                   <property name="styleSheet">
                    <string notr="true">QPushButton{
-      
-      background-color: rgb(227, 199, 0);
+	
+	background-color: rgb(227, 199, 0);
 border:1px solid rgba(113, 17, 15,50);
 border-radius:6px;
 }
 QPushButton:hover {
 background-color:rgb(139, 29, 31)
-      
+	
 }
 QPushButton:pressed {
-      background-color: rgb(232, 59, 35);
+	background-color: rgb(232, 59, 35);
 }
 </string>
                   </property>
@@ -926,17 +926,17 @@ QPushButton:pressed {
                   </property>
                   <property name="styleSheet">
                    <string notr="true">QPushButton{
-      
-      background-color: rgb(240, 108, 96);
+	
+	background-color: rgb(240, 108, 96);
 border:1px solid rgba(113, 17, 15,50);
 border-radius:6px;
 }
 QPushButton:hover {
 background-color:rgb(139, 29, 31)
-      
+	
 }
 QPushButton:pressed {
-      background-color: rgb(232, 59, 35);
+	background-color: rgb(232, 59, 35);
 }
 </string>
                   </property>
@@ -1009,7 +1009,7 @@ border-radius:15px;
 }</string>
                   </property>
                   <property name="frameShape">
-                   <enum>QFrame::StyledPanel</enum>
+                   <enum>QFrame::NoFrame</enum>
                   </property>
                   <property name="frameShadow">
                    <enum>QFrame::Raised</enum>
@@ -1819,7 +1819,7 @@ font: 15pt &quot;Microsoft YaHei UI&quot;;
                    <string notr="true"/>
                   </property>
                   <property name="frameShape">
-                   <enum>QFrame::StyledPanel</enum>
+                   <enum>QFrame::NoFrame</enum>
                   </property>
                   <property name="frameShadow">
                    <enum>QFrame::Raised</enum>
@@ -1909,7 +1909,7 @@ border-radius:15px</string>
                    </size>
                   </property>
                   <property name="frameShape">
-                   <enum>QFrame::StyledPanel</enum>
+                   <enum>QFrame::NoFrame</enum>
                   </property>
                   <property name="frameShadow">
                    <enum>QFrame::Raised</enum>
@@ -1983,40 +1983,68 @@ QPushButton:hover{
                     </widget>
                    </item>
                    <item>
-                    <widget class="QProgressBar" name="progress_bar">
+                    <widget class="QSlider" name="video_slider">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
+                     <property name="styleSheet">
+                      <string notr="true">            QSlider::groove:horizontal {
+                height: 5px;
+                background: #e0e0e0;
+                border: 1px solid #bbb;
+                border-radius: 2px;
+            }
+
+            QSlider::handle:horizontal {
+                background: rgb(255,150,100);
+                border: 1px solid rgb(255,150,100);
+                width: 14px;
+                height: 14px;
+                margin: -5px 0;  /* Handle is placed at the center of the groove */
+                border-radius: 7px;
+            }
+
+            QSlider::sub-page:horizontal {
+                background: #ff0000;
+                border: 1px solid #ff0000;
+                height: 5px;
+                border-radius: 2px;
+            }
+
+            QSlider::add-page:horizontal {
+                background: #e0e0e0;
+                border: 1px solid #bbb;
+                height: 5px;
+                border-radius: 2px;
+            }</string>
+                     </property>
+                     <property name="orientation">
+                      <enum>Qt::Horizontal</enum>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QLabel" name="time_label">
                      <property name="minimumSize">
                       <size>
-                       <width>0</width>
-                       <height>20</height>
+                       <width>107</width>
+                       <height>15</height>
                       </size>
                      </property>
                      <property name="maximumSize">
                       <size>
                        <width>16777215</width>
-                       <height>20</height>
+                       <height>16777215</height>
                       </size>
                      </property>
                      <property name="styleSheet">
-                      <string notr="true">QProgressBar{ 
-font: 700 10pt &quot;Microsoft YaHei UI&quot;;
-color: rgb(253, 143, 134); 
-text-align:center; 
-border:3px solid rgb(255, 255, 255);
-border-radius: 10px; 
-background-color: rgba(215, 215, 215,100);
-} 
-
-QProgressBar:chunk{ 
-border-radius:0px; 
-background: rgba(119, 111, 252, 200);
-border-radius: 7px;
-}</string>
+                      <string notr="true">font: &quot;Microsoft YaHei UI&quot;;</string>
                      </property>
-                     <property name="maximum">
-                      <number>1000</number>
-                     </property>
-                     <property name="value">
-                      <number>0</number>
+                     <property name="text">
+                      <string/>
                      </property>
                     </widget>
                    </item>
@@ -2075,7 +2103,7 @@ QPushButton:hover{
                 </property>
                 <property name="styleSheet">
                  <string notr="true">QFrame#prm_page{
-background-color: qradialgradient(cx:0, cy:0, radius:1, fx:0.1, fy:0.1, stop:0 rgb(0, 0, 100),  stop:1 rgb(10, 50, 200));
+background-color: qradialgradient(cx:0, cy:0, radius:1, fx:0.1, fy:0.1, stop:0 rgb(120, 205, 200),  stop:1 rgb(5, 150, 229));
 border-top-left-radius:30px;
 border-top-right-radius:0px;
 border-bottom-right-radius:0px;
@@ -2244,8 +2272,8 @@ font: 700 13pt &quot;Nirmala UI&quot;;
                        <string notr="true">
 QComboBox {
             background-color: rgba(255,255,255,90);
-                  color: rgba(0, 0, 0, 200);
-                  font: 600 9pt &quot;Segoe UI&quot;;
+			color: rgba(0, 0, 0, 200);
+			font: 600 9pt &quot;Segoe UI&quot;;
             border: 1px solid lightgray;
             border-radius: 10px;
             padding-left: 15px;
@@ -2279,7 +2307,7 @@ QComboBox {
         QComboBox QAbstractItemView {
             border: none;
             outline: none;
-                  padding: 10px;
+			padding: 10px;
             background-color: rgb(223, 188, 220);
         }
 
@@ -3245,7 +3273,7 @@ border: none;
 }
 
 QPushButton:hover{
-background-color: rgba(114, 129, 214, 59);
+
 }</string>
                     </property>
                     <property name="text">
@@ -3292,7 +3320,7 @@ border: none;
 }
 
 QPushButton:hover{
-background-color: rgba(114, 129, 214, 59);
+
 }</string>
                     </property>
                     <property name="text">
@@ -3340,7 +3368,7 @@ border: none;
 }
 
 QPushButton:hover{
-background-color: rgba(114, 129, 214, 59);
+
 }</string>
                     </property>
                     <property name="text">
@@ -3384,7 +3412,7 @@ border: none;
 }
 
 QPushButton:hover{
-background-color: rgba(114, 129, 214, 59);
+
 }</string>
                     </property>
                     <property name="text">
@@ -3432,7 +3460,7 @@ border: none;
 }
 
 QPushButton:hover{
-background-color: rgba(114, 129, 214, 59);
+
 }</string>
                     </property>
                     <property name="text">
@@ -4774,40 +4802,18 @@ QPushButton:hover{
                     </widget>
                    </item>
                    <item>
-                    <widget class="QProgressBar" name="progress_bar_cam">
-                     <property name="minimumSize">
-                      <size>
-                       <width>0</width>
-                       <height>20</height>
-                      </size>
+                    <widget class="QLabel" name="time_label_cam">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
                      </property>
-                     <property name="maximumSize">
-                      <size>
-                       <width>16777215</width>
-                       <height>20</height>
-                      </size>
+                     <property name="text">
+                      <string/>
                      </property>
-                     <property name="styleSheet">
-                      <string notr="true">QProgressBar{ 
-font: 700 10pt &quot;Microsoft YaHei UI&quot;;
-color: rgb(253, 143, 134); 
-text-align:center; 
-border:3px solid rgb(255, 255, 255);
-border-radius: 10px; 
-background-color: rgba(215, 215, 215,100);
-} 
-
-QProgressBar:chunk{ 
-border-radius:0px; 
-background: rgba(119, 111, 252, 200);
-border-radius: 7px;
-}</string>
-                     </property>
-                     <property name="maximum">
-                      <number>1000</number>
-                     </property>
-                     <property name="value">
-                      <number>0</number>
+                     <property name="alignment">
+                      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                      </property>
                     </widget>
                    </item>
@@ -4866,7 +4872,7 @@ QPushButton:hover{
                 </property>
                 <property name="styleSheet">
                  <string notr="true">QFrame#prm_page_cam{
-background-color: qradialgradient(cx:0, cy:0, radius:1, fx:0.1, fy:0.1, stop:0 rgb(0, 0, 100),  stop:1 rgb(10, 50, 200));
+background-color: qradialgradient(cx:0, cy:0, radius:1, fx:0.1, fy:0.1, stop:0 rgb(120, 205, 200),  stop:1 rgb(5, 150, 229));
 border-top-left-radius:30px;
 border-top-right-radius:0px;
 border-bottom-right-radius:0px;
@@ -5035,8 +5041,8 @@ font: 700 13pt &quot;Nirmala UI&quot;;
                        <string notr="true">
 QComboBox {
             background-color: rgba(255,255,255,90);
-                  color: rgba(0, 0, 0, 200);
-                  font: 600 9pt &quot;Segoe UI&quot;;
+			color: rgba(0, 0, 0, 200);
+			font: 600 9pt &quot;Segoe UI&quot;;
             border: 1px solid lightgray;
             border-radius: 10px;
             padding-left: 15px;
@@ -5070,7 +5076,7 @@ QComboBox {
         QComboBox QAbstractItemView {
             border: none;
             outline: none;
-                  padding: 10px;
+			padding: 10px;
             background-color: rgb(223, 188, 220);
         }
 
@@ -5984,7 +5990,7 @@ padding-left: 10px;
              </size>
             </property>
             <property name="frameShape">
-             <enum>QFrame::StyledPanel</enum>
+             <enum>QFrame::NoFrame</enum>
             </property>
             <property name="frameShadow">
              <enum>QFrame::Raised</enum>
@@ -6009,7 +6015,7 @@ padding-left: 10px;
 color: rgba(0, 0, 0, 140);</string>
                </property>
                <property name="text">
-                <string>Welcome!</string>
+                <string>歡迎使用YOLOv8檢測系統，請選擇Mode</string>
                </property>
               </widget>
              </item>
@@ -6025,7 +6031,7 @@ color: rgba(0, 0, 0, 140);</string>
                 <string notr="true">border-radius:30px;</string>
                </property>
                <property name="frameShape">
-                <enum>QFrame::StyledPanel</enum>
+                <enum>QFrame::NoFrame</enum>
                </property>
                <property name="frameShadow">
                 <enum>QFrame::Raised</enum>
