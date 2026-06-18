@@ -10,7 +10,7 @@ GLOBAL_STATE = False    # max min flag
 GLOBAL_TITLE_BAR = True
 
 
-class UIFuncitons(MainWindow):
+class UIFunctions(MainWindow):
     # 展開左側菜單
     def toggleMenu(self, enable):
         if enable:
@@ -130,13 +130,13 @@ class UIFuncitons(MainWindow):
         # 雙擊標題欄最大化/還原
         def dobleClickMaximizeRestore(event):
             if event.type() == QEvent.MouseButtonDblClick:
-                QTimer.singleShot(250, lambda: UIFuncitons.maximize_restore(self))
+                QTimer.singleShot(250, lambda: UIFunctions.maximize_restore(self))
         self.top.mouseDoubleClickEvent = dobleClickMaximizeRestore
         
         # 移動視窗 / 最大化 / 還原
         def moveWindow(event):
             if GLOBAL_STATE:  # 如果視窗已最大化，則切換到還原狀態
-                UIFuncitons.maximize_restore(self)
+                UIFunctions.maximize_restore(self)
             if event.buttons() == Qt.LeftButton:  # 移動視窗
                 self.move(self.pos() + event.globalPos() - self.dragPos)
                 self.dragPos = event.globalPos()
@@ -151,7 +151,7 @@ class UIFuncitons(MainWindow):
         # 最小化視窗
         self.min_sf.clicked.connect(lambda: self.showMinimized())
         # 最大化/還原視窗
-        self.max_sf.clicked.connect(lambda: UIFuncitons.maximize_restore(self))
+        self.max_sf.clicked.connect(lambda: UIFunctions.maximize_restore(self))
         # 關閉應用程式
         self.close_button.clicked.connect(self.close)
 
