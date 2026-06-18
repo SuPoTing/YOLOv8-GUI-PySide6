@@ -41,13 +41,13 @@ Click "Add Folder" and select:
 
 Click "Convert .py to .exe".
 
-### 5. Copy Essential Directories
+### 4. Copy Essential Directories
 Copy the `config`, `img`, `models`, `ui`, and `utils` folders into:
 ```shell
 (your YOLOv8-GUI-PySide6-main PATH)\output\main
 ```
 
-### 6. Run main.exe
+### 5. Run main.exe
 Execute main.exe inside the output directory to launch the compiled application.
 
 ## Bundling with Nuitka
