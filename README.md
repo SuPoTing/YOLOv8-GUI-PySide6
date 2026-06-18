@@ -42,7 +42,7 @@ Click "Add Folder" and select:
 Click "Convert .py to .exe".
 
 ### 5. Copy Essential Directories
-Copy the config, img, models, ui, and utils folders into:
+Copy the `config`, `img`, `models`, `ui`, and `utils` folders into:
 ```shell
 (your YOLOv8-GUI-PySide6-main PATH)\output\main
 ```
@@ -53,7 +53,7 @@ Execute main.exe inside the output directory to launch the compiled application.
 ## Bundling with Nuitka
 ### 1. Create a Virtual Environment
 
-Click create_env-nuitka.bat to generate a Python 3.10 virtual environment, then click activate.bat to activate it.
+Click `create_env-nuitka.bat` to generate a Python 3.10 virtual environment, then click activate.bat to activate it.
 
 ### 2. Execute the Nuitka Compilation Command
 
@@ -62,7 +62,7 @@ nuitka --standalone --msvc=latest --lto=yes --enable-plugin=pyside6 --module-par
 ```
 ### 3. Copy Assets Folder
 
-Copy the .\venv\Lib\site-packages\ultralytics folder into the newly generated .dist directory.
+Copy the `.\venv\Lib\site-packages\ultralytics` folder into the newly generated .dist directory.
 
 ### 4. Run main.exe
 
@@ -70,9 +70,9 @@ Navigate into the .dist directory and execute main.exe to run the application.
 
 ## Important Notes
 - `ultralytics` is licensed under the `AGPL-3.0` terms. If you intend to use it for commercial purposes, an official license must be acquired from Ultralytics.
-- To deploy your custom weights, you must first train a compatible model architecture via ultralytics (supports YOLOv8, YOLOv9 Det/Seg, YOLOv10 Det-only, YOLOv11, YOLOv12, and YOLOv26). Once trained, drop your exported .pt weight files into the corresponding subdirectories inside the models/* path.
+- To deploy your custom weights, you must first train a compatible model architecture via `ultralytics` (supports YOLOv8, YOLOv9 Det/Seg, YOLOv10 Det-only, YOLOv11, YOLOv12, and YOLOv26). Once trained, drop your exported `.pt` weight files into the corresponding subdirectories inside the `models/*` path.
 - The software might contain minor bugs. I will continue optimizing codebases and adding interesting features as time permits.
-- Exported inference results will automatically be stored under the ./run path directory.
+- Exported inference results will automatically be stored under the `./run` path directory.
 - The core UI layout asset file is home.ui. If you modify the interface using Qt Designer, regenerate the Python source binding with the following command:
 ```shell
 pyside6-uic home.ui > ui/home.py
