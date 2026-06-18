@@ -48,7 +48,7 @@ Copy the `config`, `img`, `models`, `ui`, and `utils` folders into:
 ```
 
 ### 5. Run main.exe
-Execute main.exe inside the output directory to launch the compiled application.
+Execute `main.exe` inside the output directory to launch the compiled application.
 
 ## Bundling with Nuitka
 ### 1. Create a Virtual Environment
@@ -62,7 +62,7 @@ nuitka --standalone --msvc=latest --lto=yes --enable-plugin=pyside6 --module-par
 ```
 ### 3. Copy Assets Folder
 
-Copy the `.\venv\Lib\site-packages\ultralytics` folder into the newly generated .dist directory.
+Copy the `.\venv\Lib\site-packages\ultralytics` folder into the newly generated `.dist` directory.
 
 ### 4. Run main.exe
 
