@@ -73,15 +73,15 @@ Navigate into the .dist directory and execute main.exe to run the application.
 - To deploy your custom weights, you must first train a compatible model architecture via `ultralytics` (supports YOLOv8, YOLOv9 Det/Seg, YOLOv10 Det-only, YOLOv11, YOLOv12, and YOLOv26). Once trained, drop your exported `.pt` weight files into the corresponding subdirectories inside the `models/*` path.
 - The software might contain minor bugs. I will continue optimizing codebases and adding interesting features as time permits.
 - Exported inference results will automatically be stored under the `./run` path directory.
-- The core UI layout asset file is home.ui. If you modify the interface using Qt Designer, regenerate the Python source binding with the following command:
+- The core UI layout asset file is `home.ui`. If you modify the interface using Qt Designer, regenerate the Python source binding with the following command:
 ```shell
 pyside6-uic home.ui > ui/home.py
 ```
-- The application graphic dictionary is resources.qrc. If you alter default app icons, recompile the asset file using the following command:
+- The application graphic dictionary is `resources.qrc`. If you alter default app icons, recompile the asset file using the following command:
 ```shell
 pyside6-rcc resources.qrc > ui/resources_rc.py
 ```
-- Oriented Bounding Boxes (OBB) functionality operates under Detect mode. To load your custom OBB models, the filename must explicitly contain the substring obb (e.g., yolov8n-obb.pt). Files without obb in their names will fall back to standard horizontal detection.
+- Oriented Bounding Boxes (OBB) functionality operates under `Detect mode`. To load your custom OBB models, the filename must explicitly contain the substring `obb` (e.g., `yolov8n-obb.pt`). Files without `obb` in their names will fall back to standard horizontal detection.
 
 ## Implemented Features
 ### 1.Pipeline Task Selection
