@@ -21,7 +21,7 @@ from ultralytics.utils.torch_utils import select_device, smart_inference_mode
 from ultralytics.engine.predictor import BasePredictor
 from ultralytics.models.yolo.detect.predict import DetectionPredictor
 from ultralytics.engine.results import Results
-from ultralytics.utils import DEFAULT_CFG, LOGGER, MACOS, WINDOWS, callbacks, colorstr, ops
+from ultralytics.utils import DEFAULT_CFG, LOGGER, MACOS, WINDOWS, callbacks, colorstr, nms, ops
 from ultralytics.utils.plotting import Annotator, colors, save_one_box
 from ultralytics.utils.files import increment_path
 from ultralytics.nn.autobackend import AutoBackend
@@ -112,6 +112,7 @@ class YoloPredictor(BasePredictor, QObject):
         self.frames = None
         self.frame = 0               
         self.fps = None
+        self.im = None  # 確保顯式聲明屬性
         
         self.start_time = None       
         self.elapsed_time = 0        
@@ -184,9 +185,26 @@ class YoloPredictor(BasePredictor, QObject):
             self.check_save_dirs()
             
             if not self.done_warmup:
-                is_pt = getattr(self.model, 'pytorch', False) or getattr(self.model, 'pt', False)
-                is_triton = getattr(self.model, 'triton', False)
-                self.model.warmup(imgsz=(1 if is_pt or is_triton else self.dataset.bs, 3, *self.imgsz))
+                # === 安全熱身補丁：自動識別 AutoBackend 與原生 nn.Module ===
+                if hasattr(self.model, 'warmup'):
+                    fmt = getattr(self.model, 'format', 'pt')
+                    channels = getattr(self.model, 'channels', 3)
+                    self.model.warmup(imgsz=(1 if fmt in {"pt", "triton"} else self.dataset.bs, channels, *self.imgsz))
+                else:
+                    # 如果是 Track 任務抽出的原生 DetectionModel，手動送入 Dummy Tensor 預熱 GPU
+                    try:
+                        dev = next(self.model.parameters()).device if list(self.model.parameters()) else torch.device('cpu')
+                        half_mode = getattr(self.model, 'fp16', False) or (hasattr(self.model, 'args') and getattr(self.model.args, 'half', False))
+                        
+                        dummy_input = torch.zeros(1, 3, *self.imgsz).to(dev)
+                        if half_mode:
+                            dummy_input = dummy_input.half()
+                        
+                        with torch.no_grad():
+                            self.model(dummy_input)
+                    except Exception as warmup_err:
+                        LOGGER.warning(f"後台模型手動熱身跳過或失敗 (不影響後續偵測): {warmup_err}")
+                
                 self.done_warmup = True
 
             self.frames = self.dataset.frames if hasattr(self.dataset, 'frames') else None
@@ -223,10 +241,17 @@ class YoloPredictor(BasePredictor, QObject):
                     
                     with self._lock:  
                         if self.task == 'Track':
-                            self.results = self.track_model.track(
-                                source=im0s, conf=self.conf_thres, iou=self.iou_thres, 
-                                persist=True, verbose=False
-                            )
+                            # === 修正補丁：讓 Track 任務也使用計時器，防止後續 handle_results 找不到 .dt 崩潰 ===
+                            with profilers[1]:
+                                self.results = self.track_model.track(
+                                    source=im0s, conf=self.conf_thres, iou=self.iou_thres, 
+                                    persist=True, verbose=False
+                                )
+                            
+                            # 為了讓 handle_results 的 profilers[0] 和 profilers[2] 也不踩空，手動給予一個安全的初始值
+                            if not hasattr(profilers[0], 'dt'): profilers[0].dt = 0.0
+                            if not hasattr(profilers[2], 'dt'): profilers[2].dt = 0.0
+                            
                             self.track_pointlist = []
                             for res in self.results:
                                 if res.boxes.id is not None:
@@ -241,6 +266,7 @@ class YoloPredictor(BasePredictor, QObject):
                                         points = np.array(track_item, dtype=np.int32).reshape((-1, 1, 2))
                                         self.track_pointlist.append(points)
                         else:
+                            # 常規偵測、分割流程
                             preds = self.inference(im, profilers[1], *args, **kwargs)
                             self.results = self.postprocess_results(preds, im, im0s, self.track_history, profilers[2])
 
@@ -259,7 +285,6 @@ class YoloPredictor(BasePredictor, QObject):
                     self.release_video_writers()
                     self.yolo2main_status_msg.emit('檢測終止')
                     
-                    # 安全檢查：只有當 dataset 具備 close 方法時才進行調用
                     if hasattr(self.dataset, 'close'):
                         self.dataset.close()
                         
@@ -285,52 +310,70 @@ class YoloPredictor(BasePredictor, QObject):
         with profiler:
             if self.task == 'Classify':
                 return self.classify_postprocess(preds, im, im0s)
+            elif self.task == 'Segment':
+                # 強制 Segment 任務走專屬的 postprocess 流程，正確剝離 protos
+                return self.segment_postprocess(preds, im, im0s)
             else:
-                postprocess_methods = {
-                    'Detect': self.postprocess,
-                    'obb': self.obb_postprocess,
-                    'Segment': self.segment_postprocess,
-                    'Pose': self.pose_postprocess,
-                }
-                return postprocess_methods[self.task](preds, im, im0s)
+                return self.postprocess(preds, im, im0s)
 
     def handle_results(self, im, im0s, paths, s, profilers):
+        # 防範 self.results 為 None 或空值
+        if self.results is None or len(self.results) == 0:
+            return
+
+        # === 修正補丁：使用安全範圍長度，防範 Track 任務引發 IndexError ===
         n = len(im0s)
-        for i in range(n):
+        safe_n = min(n, len(self.results))
+        
+        for i in range(safe_n):
             self.seen += 1
-            self.results[i].speed = {
-                'preprocess': profilers[0].dt * 1E3 / n,
-                'inference': profilers[1].dt * 1E3 / n,
-                'postprocess': profilers[2].dt * 1E3 / n
-            }
+            
+            # 安全賦值 speed 字典
+            if hasattr(self.results[i], 'speed') or isinstance(self.results[i], Results):
+                self.results[i].speed = {
+                    'preprocess': profilers[0].dt * 1E3 / n,
+                    'inference': profilers[1].dt * 1E3 / n,
+                    'postprocess': profilers[2].dt * 1E3 / n
+                }
+                
             self.class_nums = 0
             self.target_nums = 0
             
-            s[i] += self.write_results(i, Path(paths[i]), im, s)
-            im0 = None if self.source_type.tensor else im0s[i].copy()
-            if 'no detections' in s:
-                self.im = im0
+            with self._lock:
+                s[i] += self.write_results(i, Path(paths[i]), im, s)
+                im0 = None if self.source_type.tensor else im0s[i].copy()
+                if 'no detections' in s:
+                    self.im = im0
 
             self.send_results(im0)
   
     def send_results(self, im0):
-        """[GUI 傳輸最佳化補丁]：在發送訊號前進行合理的降採樣(Downsampling)，防範 4K 巨量資料阻塞主線程"""
-        target_display_width = 1280  # 限制傳遞給 UI 的最大寬度，兼顧畫質與極致速度
+        """[GUI 傳輸最佳化補丁]：引入執行緒鎖與深拷貝，防範拉伸時主執行緒延遲讀取引發指標衝突"""
+        target_display_width = 1280  
+        raw_pre, raw_res = None, None
 
-        def scale_image(img_mat):
+        with self._lock:
+            if im0 is not None:
+                raw_pre = im0 if isinstance(im0, np.ndarray) else (im0[0] if len(im0) > 0 else None)
+            if self.im is not None:
+                raw_res = self.im
+
+        def scale_and_copy_image(img_mat):
             if img_mat is not None and isinstance(img_mat, np.ndarray) and img_mat.size > 0:
                 h, w = img_mat.shape[:2]
                 if w > target_display_width:
                     scale = target_display_width / w
-                    return cv2.resize(img_mat, (target_display_width, int(h * scale)), interpolation=cv2.INTER_LINEAR)
-                return img_mat.copy()
-            return img_mat
+                    resized = cv2.resize(img_mat, (target_display_width, int(h * scale)), interpolation=cv2.INTER_LINEAR)
+                    return resized.copy()  
+                return img_mat.copy()      
+            return None
 
-        scaled_pre = scale_image(im0 if isinstance(im0, np.ndarray) else (im0[0] if im0 is not None else None))
+        scaled_pre = scale_and_copy_image(raw_pre)
+        scaled_res = scale_and_copy_image(raw_res)
+
         if scaled_pre is not None:
             self.yolo2main_pre_img.emit(scaled_pre)
 
-        scaled_res = scale_image(self.im)
         if scaled_res is not None:
             self.yolo2main_res_img.emit(scaled_res)
 
@@ -402,67 +445,153 @@ class YoloPredictor(BasePredictor, QObject):
 
     def preprocess(self, img):
         not_tensor = not isinstance(img, torch.Tensor)
+        
+        # === 安全讀取精度補丁：防範 DetectionModel 缺少 fp16 屬性引發崩潰 ===
+        is_model_ready = hasattr(self, 'model') and self.model is not None
+        if is_model_ready:
+            if hasattr(self.model, 'fp16'):
+                # 如果是官方包裝的 AutoBackend，直接讀取屬性
+                half_mode = self.model.fp16
+            else:
+                # 如果是 Track 任務拿到的原生 DetectionModel，透過檢查權重張量型態來判斷是否為半精度
+                try:
+                    half_mode = next(self.model.parameters()).dtype == torch.float16 if list(self.model.parameters()) else False
+                except Exception:
+                    half_mode = getattr(self.args, 'half', False)
+        else:
+            half_mode = getattr(self.args, 'half', False)
+
         if not_tensor:
             img = np.stack(self.pre_transform(img))
             img = torch.from_numpy(img).to(self.device, non_blocking=True)
             img = img.permute(0, 3, 1, 2)  
-            img = img.half() if hasattr(self, 'model') and self.model.fp16 else img.float()
+            img = img.half() if half_mode else img.float()
             img = img.flip(1) 
             img /= 255.0
         else:
             img = img.to(self.device, non_blocking=True)
-            img = img.half() if self.model.fp16 else img.float()
+            img = img.half() if half_mode else img.float()
         return img
 
-    def postprocess(self, preds, img, orig_imgs):
-        preds = ops.non_max_suppression(
-            preds, self.conf_thres, self.iou_thres,
-            agnostic=self.args.agnostic_nms, max_det=self.args.max_det, classes=self.args.classes,
-        )
-        if not isinstance(orig_imgs, list):
-            orig_imgs = ops.convert_torch2numpy_batch(orig_imgs)
+    def postprocess(self, preds, img, orig_imgs, **kwargs):
+        save_feats = getattr(self, "_feats", None) is not None
+        
+        # 如果是 tuple，通常第一個元素是物件偵測的核心預測 Tensor
+        if isinstance(preds, (list, tuple)):
+            preds = preds[0]
 
-        results = []
-        for i, (pred, orig_img) in enumerate(zip(preds, orig_imgs)):
-            pred[:, :4] = ops.scale_boxes(img.shape[2:], pred[:, :4], orig_img.shape)
-            img_path = self.batch[0][i]
-            results.append(Results(orig_img, path=img_path, names=self.model.names, boxes=pred))
+        preds = nms.non_max_suppression(
+            preds,
+            self.conf_thres,
+            kwargs.pop("iou", self.iou_thres),  # allow callers (e.g. TrackTrack loose-NMS recovery) to override IoU
+            self.args.classes,
+            self.args.agnostic_nms,
+            max_det=self.args.max_det,
+            nc=0 if self.task == "detect" else len(self.model.names),
+            end2end=getattr(self.model, "end2end", False),
+            rotated=True if self.task == "obb" else False,
+            return_idxs=save_feats,
+        )
+
+        if not isinstance(orig_imgs, list):  # input images are a torch.Tensor, not a list
+            orig_imgs = ops.convert_torch2numpy_batch(orig_imgs)[..., ::-1]
+
+        if save_feats:
+            obj_feats = self.get_obj_feats(self._feats, preds[1])
+            preds = preds[0]
+            
+        if self.task == "Segment":
+            protos = kwargs.pop("protos", None)
+            results = self.segment_construct_results(preds, img, orig_imgs, protos=protos)
+        else:
+            results = self.construct_results(preds, img, orig_imgs, **kwargs)
+
+        if save_feats:
+            for r, f in zip(results, obj_feats):
+                r.feats = f  # add object features to results
+
         return results
 
-    def obb_postprocess(self, preds, img, orig_imgs):
-        preds = ops.non_max_suppression(
-            preds, self.conf_thres, self.iou_thres,
-            agnostic=self.args.agnostic_nms, max_det=self.args.max_det,
-            nc=len(self.model.names), classes=self.args.classes, rotated=True,
-        )
-        if not isinstance(orig_imgs, list):
-            orig_imgs = ops.convert_torch2numpy_batch(orig_imgs)
+    @staticmethod
+    def get_obj_feats(feat_maps, idxs):
+        """Extract object features from the feature maps."""
+        import torch
 
-        results = []
-        for pred, orig_img, img_path in zip(preds, orig_imgs, self.batch[0]):
-            rboxes = ops.regularize_rboxes(torch.cat([pred[:, :4], pred[:, -1:]], dim=-1))
-            rboxes[:, :4] = ops.scale_boxes(img.shape[2:], rboxes[:, :4], orig_img.shape, xywh=True)
-            obb = torch.cat([rboxes, pred[:, 4:6]], dim=-1)
-            results.append(Results(orig_img, path=img_path, names=self.model.names, obb=obb))
-        return results
+        s = min(x.shape[1] for x in feat_maps)  # find shortest vector length
+        obj_feats = torch.cat(
+            [x.permute(0, 2, 3, 1).reshape(x.shape[0], -1, s, x.shape[1] // s).mean(dim=-1) for x in feat_maps], dim=1
+        )  # mean reduce all vectors to same length
+        return [feats[idx] if idx.shape[0] else [] for feats, idx in zip(obj_feats, idxs)]  # for each img in batch
+
+    def construct_results(self, preds, img, orig_imgs):
+        """Construct a list of Results objects from model predictions.
+
+        Args:
+            preds (list[torch.Tensor]): List of predicted bounding boxes and scores for each image.
+            img (torch.Tensor): Batch of preprocessed images used for inference.
+            orig_imgs (list[np.ndarray]): List of original images before preprocessing.
+
+        Returns:
+            (list[Results]): List of Results objects containing detection information for each image.
+        """
+        if self.task == "Detect":
+            return [
+                self.construct_result(pred, img, orig_img, img_path)
+                for pred, orig_img, img_path in zip(preds, orig_imgs, self.batch[0])
+            ]
+        elif self.task == "Pose":
+            return [
+                self.pose_construct_result(pred, img, orig_img, img_path)
+                for pred, orig_img, img_path in zip(preds, orig_imgs, self.batch[0])
+            ]
+
+    def construct_result(self, pred, img, orig_img, img_path):
+        """Construct a single Results object from one image prediction.
+
+        Args:
+            pred (torch.Tensor): Predicted boxes and scores with shape (N, 6) where N is the number of detections.
+            img (torch.Tensor): Preprocessed image tensor used for inference.
+            orig_img (np.ndarray): Original image before preprocessing.
+            img_path (str): Path to the original image file.
+
+        Returns:
+            (Results): Results object containing the original image, image path, class names, and scaled bounding boxes.
+        """
+        pred[:, :4] = ops.scale_boxes(img.shape[2:], pred[:, :4], orig_img.shape)
+        return Results(orig_img, path=img_path, names=self.model.names, boxes=pred[:, :6])
+
+    def obb_construct_result(self, pred, img, orig_img, img_path):
+        """Construct the result object from the prediction.
+
+        Args:
+            pred (torch.Tensor): The predicted bounding boxes, scores, and rotation angles with shape (N, 7) where the
+                last dimension contains [x, y, w, h, confidence, class_id, angle].
+            img (torch.Tensor): The image after preprocessing with shape (B, C, H, W).
+            orig_img (np.ndarray): The original image before preprocessing.
+            img_path (str): The path to the original image.
+
+        Returns:
+            (Results): The result object containing the original image, image path, class names, and oriented bounding
+                boxes.
+        """
+        rboxes = torch.cat([pred[:, :4], pred[:, -1:]], dim=-1)
+        rboxes[:, :4] = ops.scale_boxes(img.shape[2:], rboxes[:, :4], orig_img.shape, xywh=True)
+        obb = torch.cat([rboxes, pred[:, 4:6]], dim=-1)
+        return Results(orig_img, path=img_path, names=self.model.names, obb=obb)
 
     def classify_preprocess(self, img):
+        """Convert input images to model-compatible tensor format with appropriate normalization."""
         if not isinstance(img, torch.Tensor):
-            is_legacy_transform = any(
-                self._legacy_transform_name in str(transform) for transform in self.transforms.transforms
+            img = torch.stack(
+                [self.transforms(Image.fromarray(cv2.cvtColor(im, cv2.COLOR_BGR2RGB))) for im in img], dim=0
             )
-            if is_legacy_transform:
-                img = torch.stack([self.transforms(im) for im in img], dim=0)
-            else:
-                img = torch.stack(
-                    [self.transforms(Image.fromarray(cv2.cvtColor(im, cv2.COLOR_BGR2RGB))) for im in img], dim=0
-                )
-        img = (img if isinstance(img, torch.Tensor) else torch.from_numpy(img)).to(self.model.device, non_blocking=True)
-        return img.half() if self.model.fp16 else img.float()
+        img = (img if isinstance(img, torch.Tensor) else torch.from_numpy(img)).to(self.model.device)
+        return img.half() if self.model.fp16 else img.float()  # Convert uint8 to fp16/32
 
     def classify_postprocess(self, preds, img, orig_imgs):
-        if not isinstance(orig_imgs, list):
-            orig_imgs = ops.convert_torch2numpy_batch(orig_imgs)
+        if not isinstance(orig_imgs, list):  # Input images are a torch.Tensor, not a list
+            orig_imgs = ops.convert_torch2numpy_batch(orig_imgs)[..., ::-1]
+
         preds = preds[0] if isinstance(preds, (list, tuple)) else preds
         return [
             Results(orig_img, path=img_path, names=self.model.names, probs=pred)
@@ -470,55 +599,60 @@ class YoloPredictor(BasePredictor, QObject):
         ]
 
     def segment_postprocess(self, preds, img, orig_imgs):
-        p = ops.non_max_suppression(
-            preds[0], self.conf_thres, self.iou_thres,
-            agnostic=self.args.agnostic_nms, max_det=self.args.max_det,
-            nc=len(self.model.names), classes=self.args.classes,
-        )
-        if not isinstance(orig_imgs, list):
-            orig_imgs = ops.convert_torch2numpy_batch(orig_imgs)
+        protos = preds[0][1] if isinstance(preds[0], tuple) else preds[1]
+        return self.postprocess(preds[0], img, orig_imgs, protos=protos)
 
-        results = []
-        proto = preds[1][-1] if isinstance(preds[1], tuple) else preds[1]
-        for i, pred in enumerate(p):
-            orig_img = orig_imgs[i]
-            img_path = self.batch[0][i]
-            if not len(pred):
-                masks = None
-            elif self.args.retina_masks:
-                pred[:, :4] = ops.scale_boxes(img.shape[2:], pred[:, :4], orig_img.shape)
-                masks = ops.process_mask_native(proto[i], pred[:, 6:], pred[:, :4], orig_img.shape[:2])
-            else:
-                masks = ops.process_mask(proto[i], pred[:, 6:], pred[:, :4], img.shape[2:], upsample=True)
-                pred[:, :4] = ops.scale_boxes(img.shape[2:], pred[:, :4], orig_img.shape)
-            results.append(Results(orig_img, path=img_path, names=self.model.names, boxes=pred[:, :6], masks=masks))
-        return results
+    def segment_construct_results(self, preds, img, orig_imgs, protos):
+        """Construct a list of result objects from the predictions.
 
-    def pose_postprocess(self, preds, img, orig_imgs):
-        preds = ops.non_max_suppression(
-            preds, self.conf_thres, self.iou_thres,
-            agnostic=self.args.agnostic_nms, max_det=self.args.max_det,
-            classes=self.args.classes, nc=len(self.model.names),
-        )
-        if not isinstance(orig_imgs, list):
-            orig_imgs = ops.convert_torch2numpy_batch(orig_imgs)
+        Args:
+            preds (list[torch.Tensor]): List of predicted bounding boxes, scores, and masks.
+            img (torch.Tensor): The image after preprocessing.
+            orig_imgs (list[np.ndarray]): List of original images before preprocessing.
+            protos (torch.Tensor): Prototype masks tensor with shape (B, C, H, W).
 
-        results = []
-        for i, pred in enumerate(preds):
-            orig_img = orig_imgs[i]
-            pred[:, :4] = ops.scale_boxes(img.shape[2:], pred[:, :4], orig_img.shape).round()
-            pred_kpts = pred[:, 6:].view(len(pred), *self.model.kpt_shape) if len(pred) else pred[:, 6:]
-            pred_kpts = ops.scale_coords(img.shape[2:], pred_kpts, orig_img.shape)
-            img_path = self.batch[0][i]
-            results.append(Results(orig_img, path=img_path, names=self.model.names, boxes=pred[:, :6], keypoints=pred_kpts))
-        return results
+        Returns:
+            (list[Results]): List of result objects containing the original images, image paths, class names, bounding
+                boxes, and masks.
+        """
+        return [
+            self.segment_construct_result(pred, img, orig_img, img_path, proto)
+            for pred, orig_img, img_path, proto in zip(preds, orig_imgs, self.batch[0], protos)
+        ]
+
+    def segment_construct_result(self, pred, img, orig_img, img_path, proto):
+        if pred.shape[0] == 0:  # save empty boxes
+            masks = None
+        elif self.args.retina_masks:
+            pred[:, :4] = ops.scale_boxes(img.shape[2:], pred[:, :4], orig_img.shape)
+            masks = ops.process_mask_native(proto, pred[:, 6:], pred[:, :4], orig_img.shape[:2])  # NHW
+        else:
+            masks = ops.process_mask(proto, pred[:, 6:], pred[:, :4], img.shape[2:], upsample=True)  # NHW
+            pred[:, :4] = ops.scale_boxes(img.shape[2:], pred[:, :4], orig_img.shape)
+        if masks is not None:
+            keep = masks.amax((-2, -1)) > 0  # only keep predictions with masks
+            if not all(keep):  # most predictions have masks
+                pred, masks = pred[keep], masks[keep]  # indexing is slow
+        return Results(orig_img, path=img_path, names=self.model.names, boxes=pred[:, :6], masks=masks)
+
+    def pose_construct_result(self, pred, img, orig_img, img_path):
+        result = self.construct_result(pred, img, orig_img, img_path)
+        # Extract keypoints from prediction and reshape according to model's keypoint shape
+        pred_kpts = pred[:, 6:].view(pred.shape[0], *self.model.kpt_shape)
+        # Scale keypoints coordinates to match the original image dimensions
+        pred_kpts = ops.scale_coords(img.shape[2:], pred_kpts, orig_img.shape)
+        result.update(keypoints=pred_kpts)
+        return result
 
     def setup_source(self, source):
         self.imgsz = check_imgsz(self.args.imgsz, stride=self.model.stride, min_dim=2)
+        
+        # 直接移除 crop_fraction 參數，新版的 classify_transforms 不需要也不允許傳入此參數
         self.transforms = (
-            getattr(self.model.model, "transforms", classify_transforms(self.imgsz[0], crop_fraction=self.args.crop_fraction))
+            getattr(self.model.model, "transforms", classify_transforms(self.imgsz[0]))
             if self.task == "Classify" else None
         )
+        
         self.dataset = load_inference_source(
             source=source, batch=self.args.batch, vid_stride=self.args.vid_stride, buffer=self.stream_buffer,
         )
