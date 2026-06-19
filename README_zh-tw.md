@@ -44,7 +44,7 @@ auto-py-to-exe
 將`conig`、`img`、`models`、`ui`、`utils`複製到`(your YOLOv8-GUI-PySide6-main PATH)\output\main`
 
 ### 5. 啟動main.exe
-運行main.exe以啟動應用程式。
+運行`main.exe`以啟動應用程式。
 
 ## 打包-Nuitka
 ### 1. 建立虛擬環境
