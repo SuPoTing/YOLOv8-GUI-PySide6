@@ -18,7 +18,7 @@
 ## 打包
 ### 1. 建立虛擬環境
 
-點擊`create_env.bat`建立一個python3.10版本的虛擬環境，然後點擊`activate.bat`啟動環境。
+點擊`create_env.bat`建立一個python3.10以上的虛擬環境，然後點擊`activate.bat`啟動環境。
 
 ### 2. 啟動auto-py-to-exe UI介面
 
