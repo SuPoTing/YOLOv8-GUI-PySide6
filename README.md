@@ -1,7 +1,7 @@
 # Ultralytics-Pyside6-GUI `V2.5` a GUI for Ultralytics 8.4.70
 ---
   <p align="center"> 
-  English &nbsp; | &nbsp; <a href="https://github.com/SuPoTing/Ultralytics-GUI-PySide6/blob/v2.5/README_zh-tw.md">繁體中文</a> &nbsp; | &nbsp; <a href="https://github.com/SuPoTing/Ultralytics-GUI-PySide6/blob/v2.5/README_zh-cn.md">繁體中文</a>
+  English &nbsp; | &nbsp; <a href="https://github.com/SuPoTing/Ultralytics-GUI-PySide6/blob/v2.5/README_zh-tw.md">繁體中文</a> &nbsp; | &nbsp; <a href="https://github.com/SuPoTing/Ultralytics-GUI-PySide6/blob/v2.5/README_zh-cn.md">简体中文</a>
  </p>
 
 ![](./img/preview.png)
