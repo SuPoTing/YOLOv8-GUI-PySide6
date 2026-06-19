@@ -63,7 +63,7 @@ nuitka --standalone --msvc=latest --lto=yes --enable-plugin=pyside6 --module-par
 
 ### 4. 启动main.exe
 
-进入.dist运行main.exe以启动应用程序。
+进入`.dist`运行`main.exe`以启动应用程序。
 
 ## 注意事項
 - `ultralytics`遵循`AGPL-3.0`，如果需要商业用途，需要取得其license。
@@ -72,7 +72,7 @@ nuitka --standalone --msvc=latest --lto=yes --enable-plugin=pyside6 --module-par
 - 如果您有储存检测结果，它们将保存在`./run`路径中。
 - UI设计文件为`home.ui`，如果对UI重新布局后需转换成py，需要在虚拟环境输入`pyside6-uic home.ui > ui/home.py`指令重新生成`.py`文件。
 - 资源文件为`resources.qrc`，如果修改默认icon，需要在虚拟环境输入`pyside6-rcc resources.qrc > ui/resources_rc.py`指令重新產生`.py`文件。
-- 旋转框模式在`Detect mode`，如果要使用自己训练的obb模型，需要在文件名中加`obb`，如`yolov8n-obb.pt`，未加obb只会进入一般侦测模式。
+- 旋转框模式在`Detect mode`，如果要使用自己训练的obb模型，需要在文件名中加`obb`，如`yolov8n-obb.pt`，未加`obb`只会进入一般侦测模式。
 
 ## 现有功能
 ### 1.模式选择
