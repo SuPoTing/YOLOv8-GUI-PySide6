@@ -49,7 +49,7 @@ auto-py-to-exe
 ## 打包-Nuitka
 ### 1. 建立虛擬環境
 
-點擊`create_env-nuitka.bat`建立一個python3.10以上的虛擬環境，然後點擊activate.bat啟動環境。
+點擊`create_env-nuitka.bat`建立一個python3.10以上的虛擬環境，然後點擊`activate.bat`啟動環境。
 
 ### 2. 輸入nuitka指令
 
@@ -69,9 +69,9 @@ nuitka --standalone --msvc=latest --lto=yes --enable-plugin=pyside6 --module-par
 - 如果您希望使用自己的model，則需要先使用`ultralytics`訓練yolov8/9(det&seg)/10(only det)/11/12/26的model，然後將訓練好的`.pt`檔案放入`models/*`資料夾中。
 - 軟體可能存在一些bug，我會在時間允許的情況下繼續優化並添加一些更有趣的功能。
 - 如果您有儲存檢測結果，它們將保存在`./run`路徑中。
-- UI設計檔為`home.ui`，如果修改，需要使用`pyside6-uic home.ui > ui/home.py`指令重新產生`.py`檔案。
-- 資源檔案為`resources.qrc`，如果修改預設icon，需要使用`pyside6-rcc resources.qrc > ui/resources_rc.py`指令重新產生`.py`檔案。
-- 旋轉框模式在`Detect mode`，如果要使用自己訓練的obb模型，需要在檔名中加`obb`，如`yolov8n-obb.pt`，未加obb只會進入一般偵測模式。
+- UI設計檔為`home.ui`，如果修改UI佈局後，需要在虛擬環境輸入`pyside6-uic home.ui > ui/home.py`指令重新產生`.py`檔案。
+- 資源檔案為`resources.qrc`，如果修改預設icon後，需要在虛擬環境輸入`pyside6-rcc resources.qrc > ui/resources_rc.py`指令重新產生`.py`檔案。
+- 旋轉框模式在`Detect mode`，如果要使用自己訓練的obb模型，需要在檔名中加`obb`，如`yolov8n-obb.pt`，未加`obb`只會進入一般偵測模式。
 
 ## 現有功能
 ### 1.模式選擇
