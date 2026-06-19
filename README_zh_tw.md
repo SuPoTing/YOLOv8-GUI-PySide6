@@ -62,7 +62,7 @@ nuitka --standalone --msvc=latest --lto=yes --enable-plugin=pyside6 --module-par
 
 ### 4. 啟動main.exe
 
-進入.dist運行main.exe以啟動應用程式。
+進入`.dist`運行`main.exe`以啟動應用程式。
 
 ## 注意事項
 - `ultralytics`遵循`AGPL-3.0`，如果需要商業用途，需要取得其license。
