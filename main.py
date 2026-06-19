@@ -233,11 +233,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.yolo_thread.requestInterruption()
             self.yolo_thread.quit()
             self.yolo_thread.wait()
-
-        try:
-            self.yolo_predict.disconnect()
-        except RuntimeError:
-            pass
             
         self.yolo_predict.deleteLater()
         self.yolo_predict = YoloPredictor()
@@ -250,11 +245,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.yolo_thread_cam.requestInterruption()
             self.yolo_thread_cam.quit()
             self.yolo_thread_cam.wait()
-
-        try:
-            self.yolo_predict_cam.disconnect()
-        except RuntimeError:
-            pass
 
         self.yolo_predict_cam.deleteLater()
         self.yolo_predict_cam = YoloPredictor()
