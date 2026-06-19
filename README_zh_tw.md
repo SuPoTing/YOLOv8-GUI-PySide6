@@ -9,7 +9,7 @@
 ## 實驗環境
 ### 1. 建立虛擬環境
 
-點擊`create_env.bat`建立一個python3.10版本的虛擬環境，然後啟動環境。
+點擊`create_env.bat`建立一個python3.10以上的虛擬環境，然後啟動環境。
 
 ### 2. 執行程式
 
@@ -49,7 +49,7 @@ auto-py-to-exe
 ## 打包-Nuitka
 ### 1. 建立虛擬環境
 
-點擊`create_env-nuitka.bat`建立一個python3.10版本的虛擬環境，然後點擊activate.bat啟動環境。
+點擊`create_env-nuitka.bat`建立一個python3.10以上的虛擬環境，然後點擊activate.bat啟動環境。
 
 ### 2. 輸入nuitka指令
 
