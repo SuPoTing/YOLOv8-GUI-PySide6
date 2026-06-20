@@ -52,7 +52,8 @@ def seconds_to_hms(seconds):
     return hours, minutes, seconds
 
 
-class YoloPredictor(BasePredictor, QObject):
+# 調整繼承順序，將 QObject 放在首位，確保 Qt Meta 系統正確初始化
+class YoloPredictor(QObject, BasePredictor):
     yolo2main_pre_img = Signal(np.ndarray)       
     yolo2main_res_img = Signal(np.ndarray)       
     yolo2main_status_msg = Signal(str)           
@@ -64,8 +65,9 @@ class YoloPredictor(BasePredictor, QObject):
     yolo2main_target_num = Signal(int)           
 
     def __init__(self, cfg=DEFAULT_CFG, overrides=None, _callbacks=None):
-        super(YoloPredictor, self).__init__()
-        QObject.__init__(self)
+        # 使用標準多重繼承初始化
+        super().__init__()
+        BasePredictor.__init__(self)
 
         self.args = get_cfg(cfg, overrides)
         self.save_dir = get_save_dir(self.args)
@@ -110,12 +112,21 @@ class YoloPredictor(BasePredictor, QObject):
         self.callbacks = _callbacks or callbacks.get_default_callbacks()
         self.txt_path = None
         self.frames = None
-        self.frame = 0               
+        self.frame = 0                
         self.fps = None
-        self.im = None  # 確保顯式聲明屬性
+        self.im = None  
         
+        # 顯式初始化時間與影像時長變數，防範 AttributeError
         self.start_time = None       
         self.elapsed_time = 0        
+        self.duration = 1
+        self.total_hours, self.total_minutes, self.total_seconds = 0, 0, 0
+        self.cam_hours, self.cam_minutes, self.cam_seconds = 0, 0, 0
+        
+        self.class_nums = 0
+        self.target_nums = 0
+        self.track_history = None
+        self.track_pointlist = []
         
         self.model_initialized = False
         self._lock = threading.Lock() 
@@ -158,13 +169,9 @@ class YoloPredictor(BasePredictor, QObject):
             self.initialize_model()
             self.check_model_update()
 
-            if self.task == 'Track':
-                self.track_history = defaultdict(lambda: [])
-            else:
-                self.track_history = None
+            self.track_history = defaultdict(list) if self.task == 'Track' else None
 
-            is_folder = isinstance(self.source, list)
-            if is_folder:
+            if isinstance(self.source, list):
                 for source in self.source:
                     self.setup_source(source)
                     self.set_video_total_time(source)
@@ -185,13 +192,11 @@ class YoloPredictor(BasePredictor, QObject):
             self.check_save_dirs()
             
             if not self.done_warmup:
-                # === 安全熱身補丁：自動識別 AutoBackend 與原生 nn.Module ===
                 if hasattr(self.model, 'warmup'):
                     fmt = getattr(self.model, 'format', 'pt')
                     channels = getattr(self.model, 'channels', 3)
                     self.model.warmup(imgsz=(1 if fmt in {"pt", "triton"} else self.dataset.bs, channels, *self.imgsz))
                 else:
-                    # 如果是 Track 任務抽出的原生 DetectionModel，手動送入 Dummy Tensor 預熱 GPU
                     try:
                         dev = next(self.model.parameters()).device if list(self.model.parameters()) else torch.device('cpu')
                         half_mode = getattr(self.model, 'fp16', False) or (hasattr(self.model, 'args') and getattr(self.model.args, 'half', False))
@@ -215,10 +220,10 @@ class YoloPredictor(BasePredictor, QObject):
             profilers = [ops.Profile(device=self.device) for _ in range(3)]
             
             while True:
-                if 'obb' in self.used_model_name and self.task == 'Detect':
+                if self.used_model_name and 'obb' in self.used_model_name and self.task == 'Detect':
                     self.task = 'obb'
                     self.task_frist = 'Detect'
-                if self.task == 'obb' and 'obb' not in self.used_model_name:
+                if self.task == 'obb' and self.used_model_name and 'obb' not in self.used_model_name:
                     self.task = self.task_frist
 
                 if self.continue_dtc:
@@ -241,14 +246,12 @@ class YoloPredictor(BasePredictor, QObject):
                     
                     with self._lock:  
                         if self.task == 'Track':
-                            # === 修正補丁：讓 Track 任務也使用計時器，防止後續 handle_results 找不到 .dt 崩潰 ===
                             with profilers[1]:
                                 self.results = self.track_model.track(
                                     source=im0s, conf=self.conf_thres, iou=self.iou_thres, 
                                     persist=True, verbose=False
                                 )
                             
-                            # 為了讓 handle_results 的 profilers[0] 和 profilers[2] 也不踩空，手動給予一個安全的初始值
                             if not hasattr(profilers[0], 'dt'): profilers[0].dt = 0.0
                             if not hasattr(profilers[2], 'dt'): profilers[2].dt = 0.0
                             
@@ -266,7 +269,6 @@ class YoloPredictor(BasePredictor, QObject):
                                         points = np.array(track_item, dtype=np.int32).reshape((-1, 1, 2))
                                         self.track_pointlist.append(points)
                         else:
-                            # 常規偵測、分割流程
                             preds = self.inference(im, profilers[1], *args, **kwargs)
                             self.results = self.postprocess_results(preds, im, im0s, self.track_history, profilers[2])
 
@@ -287,10 +289,9 @@ class YoloPredictor(BasePredictor, QObject):
                     
                     if hasattr(self.dataset, 'close'):
                         self.dataset.close()
-                        
                     break
 
-            if not self.source_type.stream and (self.frames is None or self.frame is None):
+            if self.source_type and not self.source_type.stream and (self.frames is None or self.frame is None):
                 self.yolo2main_status_msg.emit('檢測完成')
 
             if self.start_time is not None:
@@ -311,24 +312,20 @@ class YoloPredictor(BasePredictor, QObject):
             if self.task == 'Classify':
                 return self.classify_postprocess(preds, im, im0s)
             elif self.task == 'Segment':
-                # 強制 Segment 任務走專屬的 postprocess 流程，正確剝離 protos
                 return self.segment_postprocess(preds, im, im0s)
             else:
                 return self.postprocess(preds, im, im0s)
 
     def handle_results(self, im, im0s, paths, s, profilers):
-        # 防範 self.results 為 None 或空值
         if self.results is None or len(self.results) == 0:
             return
 
-        # === 修正補丁：使用安全範圍長度，防範 Track 任務引發 IndexError ===
         n = len(im0s)
         safe_n = min(n, len(self.results))
         
         for i in range(safe_n):
             self.seen += 1
             
-            # 安全賦值 speed 字典
             if hasattr(self.results[i], 'speed') or isinstance(self.results[i], Results):
                 self.results[i].speed = {
                     'preprocess': profilers[0].dt * 1E3 / n,
@@ -348,7 +345,6 @@ class YoloPredictor(BasePredictor, QObject):
             self.send_results(im0)
   
     def send_results(self, im0):
-        """[GUI 傳輸最佳化補丁]：引入執行緒鎖與深拷貝，防範拉伸時主執行緒延遲讀取引發指標衝突"""
         target_display_width = 1280  
         raw_pre, raw_res = None, None
 
@@ -358,13 +354,13 @@ class YoloPredictor(BasePredictor, QObject):
             if self.im is not None:
                 raw_res = self.im
 
+        # 優化：移除多餘的 .copy()，因為 cv2.resize 本身就會配置新記憶體空間
         def scale_and_copy_image(img_mat):
             if img_mat is not None and isinstance(img_mat, np.ndarray) and img_mat.size > 0:
                 h, w = img_mat.shape[:2]
                 if w > target_display_width:
                     scale = target_display_width / w
-                    resized = cv2.resize(img_mat, (target_display_width, int(h * scale)), interpolation=cv2.INTER_LINEAR)
-                    return resized.copy()  
+                    return cv2.resize(img_mat, (target_display_width, int(h * scale)), interpolation=cv2.INTER_LINEAR)
                 return img_mat.copy()      
             return None
 
@@ -391,7 +387,7 @@ class YoloPredictor(BasePredictor, QObject):
             self.release_video_writers()
             self.yolo2main_status_msg.emit('檢測完成')
             return True
-        elif self.source_type.stream and self.frames == self.frame + 1:
+        elif self.source_type and self.source_type.stream and self.frames == self.frame + 1:
             self.yolo2main_status_msg.emit('檢測完成')
             return True
         return False
@@ -412,10 +408,12 @@ class YoloPredictor(BasePredictor, QObject):
                 cap.release()  
         else:
             self.duration = 1
-            self.total_hours, self.total_minutes, self.total_seconds = '', '', ''
+            self.total_hours, self.total_minutes, self.total_seconds = 0, 0, 0
 
     def set_video_current_time(self):
-        if self.frames is not None and getattr(self.dataset, 'mode', '') != "stream" and self.dataset.mode != "stream":     
+        # 簡化：只保留精簡安全的模式判定
+        current_mode = getattr(self.dataset, 'mode', '')
+        if self.frames is not None and current_mode != "stream":     
             new_fps = round(self.frames / self.duration, 2)
             current = round(self.frame / new_fps) if new_fps > 0 else 0
             current_hours, current_minutes, current_seconds = seconds_to_hms(current)
@@ -424,7 +422,7 @@ class YoloPredictor(BasePredictor, QObject):
             self.yolo2main_time.emit(f"{current_time} / {total_time}")
             self.yolo2main_silder_range.emit(f"{current},{self.duration}")
 
-        elif self.frames is None or getattr(self.dataset, 'mode', '') == "stream" or self.dataset.mode == "stream":
+        else:
             self.cam_hours, self.cam_minutes, self.cam_seconds = seconds_to_hms(int(self.elapsed_time))
             cam_time = f"{self.cam_hours}:{self.cam_minutes:02}:{self.cam_seconds:02}"
             self.yolo2main_time.emit("程式運作時間：" + f"{cam_time}")
@@ -446,14 +444,11 @@ class YoloPredictor(BasePredictor, QObject):
     def preprocess(self, img):
         not_tensor = not isinstance(img, torch.Tensor)
         
-        # === 安全讀取精度補丁：防範 DetectionModel 缺少 fp16 屬性引發崩潰 ===
         is_model_ready = hasattr(self, 'model') and self.model is not None
         if is_model_ready:
             if hasattr(self.model, 'fp16'):
-                # 如果是官方包裝的 AutoBackend，直接讀取屬性
                 half_mode = self.model.fp16
             else:
-                # 如果是 Track 任務拿到的原生 DetectionModel，透過檢查權重張量型態來判斷是否為半精度
                 try:
                     half_mode = next(self.model.parameters()).dtype == torch.float16 if list(self.model.parameters()) else False
                 except Exception:
@@ -476,14 +471,13 @@ class YoloPredictor(BasePredictor, QObject):
     def postprocess(self, preds, img, orig_imgs, **kwargs):
         save_feats = getattr(self, "_feats", None) is not None
         
-        # 如果是 tuple，通常第一個元素是物件偵測的核心預測 Tensor
         if isinstance(preds, (list, tuple)):
             preds = preds[0]
 
         preds = nms.non_max_suppression(
             preds,
             self.conf_thres,
-            kwargs.pop("iou", self.iou_thres),  # allow callers (e.g. TrackTrack loose-NMS recovery) to override IoU
+            kwargs.pop("iou", self.iou_thres),  
             self.args.classes,
             self.args.agnostic_nms,
             max_det=self.args.max_det,
@@ -493,7 +487,7 @@ class YoloPredictor(BasePredictor, QObject):
             return_idxs=save_feats,
         )
 
-        if not isinstance(orig_imgs, list):  # input images are a torch.Tensor, not a list
+        if not isinstance(orig_imgs, list):  
             orig_imgs = ops.convert_torch2numpy_batch(orig_imgs)[..., ::-1]
 
         if save_feats:
@@ -508,32 +502,19 @@ class YoloPredictor(BasePredictor, QObject):
 
         if save_feats:
             for r, f in zip(results, obj_feats):
-                r.feats = f  # add object features to results
+                r.feats = f  
 
         return results
 
     @staticmethod
     def get_obj_feats(feat_maps, idxs):
-        """Extract object features from the feature maps."""
-        import torch
-
-        s = min(x.shape[1] for x in feat_maps)  # find shortest vector length
+        s = min(x.shape[1] for x in feat_maps)  
         obj_feats = torch.cat(
             [x.permute(0, 2, 3, 1).reshape(x.shape[0], -1, s, x.shape[1] // s).mean(dim=-1) for x in feat_maps], dim=1
-        )  # mean reduce all vectors to same length
-        return [feats[idx] if idx.shape[0] else [] for feats, idx in zip(obj_feats, idxs)]  # for each img in batch
+        )  
+        return [feats[idx] if idx.shape[0] else [] for feats, idx in zip(obj_feats, idxs)]  
 
     def construct_results(self, preds, img, orig_imgs):
-        """Construct a list of Results objects from model predictions.
-
-        Args:
-            preds (list[torch.Tensor]): List of predicted bounding boxes and scores for each image.
-            img (torch.Tensor): Batch of preprocessed images used for inference.
-            orig_imgs (list[np.ndarray]): List of original images before preprocessing.
-
-        Returns:
-            (list[Results]): List of Results objects containing detection information for each image.
-        """
         if self.task == "Detect":
             return [
                 self.construct_result(pred, img, orig_img, img_path)
@@ -544,52 +525,28 @@ class YoloPredictor(BasePredictor, QObject):
                 self.pose_construct_result(pred, img, orig_img, img_path)
                 for pred, orig_img, img_path in zip(preds, orig_imgs, self.batch[0])
             ]
+        return []
 
     def construct_result(self, pred, img, orig_img, img_path):
-        """Construct a single Results object from one image prediction.
-
-        Args:
-            pred (torch.Tensor): Predicted boxes and scores with shape (N, 6) where N is the number of detections.
-            img (torch.Tensor): Preprocessed image tensor used for inference.
-            orig_img (np.ndarray): Original image before preprocessing.
-            img_path (str): Path to the original image file.
-
-        Returns:
-            (Results): Results object containing the original image, image path, class names, and scaled bounding boxes.
-        """
         pred[:, :4] = ops.scale_boxes(img.shape[2:], pred[:, :4], orig_img.shape)
         return Results(orig_img, path=img_path, names=self.model.names, boxes=pred[:, :6])
 
     def obb_construct_result(self, pred, img, orig_img, img_path):
-        """Construct the result object from the prediction.
-
-        Args:
-            pred (torch.Tensor): The predicted bounding boxes, scores, and rotation angles with shape (N, 7) where the
-                last dimension contains [x, y, w, h, confidence, class_id, angle].
-            img (torch.Tensor): The image after preprocessing with shape (B, C, H, W).
-            orig_img (np.ndarray): The original image before preprocessing.
-            img_path (str): The path to the original image.
-
-        Returns:
-            (Results): The result object containing the original image, image path, class names, and oriented bounding
-                boxes.
-        """
         rboxes = torch.cat([pred[:, :4], pred[:, -1:]], dim=-1)
         rboxes[:, :4] = ops.scale_boxes(img.shape[2:], rboxes[:, :4], orig_img.shape, xywh=True)
         obb = torch.cat([rboxes, pred[:, 4:6]], dim=-1)
         return Results(orig_img, path=img_path, names=self.model.names, obb=obb)
 
     def classify_preprocess(self, img):
-        """Convert input images to model-compatible tensor format with appropriate normalization."""
         if not isinstance(img, torch.Tensor):
             img = torch.stack(
                 [self.transforms(Image.fromarray(cv2.cvtColor(im, cv2.COLOR_BGR2RGB))) for im in img], dim=0
             )
         img = (img if isinstance(img, torch.Tensor) else torch.from_numpy(img)).to(self.model.device)
-        return img.half() if self.model.fp16 else img.float()  # Convert uint8 to fp16/32
+        return img.half() if self.model.fp16 else img.float()  
 
     def classify_postprocess(self, preds, img, orig_imgs):
-        if not isinstance(orig_imgs, list):  # Input images are a torch.Tensor, not a list
+        if not isinstance(orig_imgs, list):  
             orig_imgs = ops.convert_torch2numpy_batch(orig_imgs)[..., ::-1]
 
         preds = preds[0] if isinstance(preds, (list, tuple)) else preds
@@ -603,43 +560,29 @@ class YoloPredictor(BasePredictor, QObject):
         return self.postprocess(preds[0], img, orig_imgs, protos=protos)
 
     def segment_construct_results(self, preds, img, orig_imgs, protos):
-        """Construct a list of result objects from the predictions.
-
-        Args:
-            preds (list[torch.Tensor]): List of predicted bounding boxes, scores, and masks.
-            img (torch.Tensor): The image after preprocessing.
-            orig_imgs (list[np.ndarray]): List of original images before preprocessing.
-            protos (torch.Tensor): Prototype masks tensor with shape (B, C, H, W).
-
-        Returns:
-            (list[Results]): List of result objects containing the original images, image paths, class names, bounding
-                boxes, and masks.
-        """
         return [
             self.segment_construct_result(pred, img, orig_img, img_path, proto)
             for pred, orig_img, img_path, proto in zip(preds, orig_imgs, self.batch[0], protos)
         ]
 
     def segment_construct_result(self, pred, img, orig_img, img_path, proto):
-        if pred.shape[0] == 0:  # save empty boxes
+        if pred.shape[0] == 0:  
             masks = None
         elif self.args.retina_masks:
             pred[:, :4] = ops.scale_boxes(img.shape[2:], pred[:, :4], orig_img.shape)
-            masks = ops.process_mask_native(proto, pred[:, 6:], pred[:, :4], orig_img.shape[:2])  # NHW
+            masks = ops.process_mask_native(proto, pred[:, 6:], pred[:, :4], orig_img.shape[:2])  
         else:
-            masks = ops.process_mask(proto, pred[:, 6:], pred[:, :4], img.shape[2:], upsample=True)  # NHW
+            masks = ops.process_mask(proto, pred[:, 6:], pred[:, :4], img.shape[2:], upsample=True)  
             pred[:, :4] = ops.scale_boxes(img.shape[2:], pred[:, :4], orig_img.shape)
         if masks is not None:
-            keep = masks.amax((-2, -1)) > 0  # only keep predictions with masks
-            if not all(keep):  # most predictions have masks
-                pred, masks = pred[keep], masks[keep]  # indexing is slow
+            keep = masks.amax((-2, -1)) > 0  
+            if not all(keep):  
+                pred, masks = pred[keep], masks[keep]  
         return Results(orig_img, path=img_path, names=self.model.names, boxes=pred[:, :6], masks=masks)
 
     def pose_construct_result(self, pred, img, orig_img, img_path):
         result = self.construct_result(pred, img, orig_img, img_path)
-        # Extract keypoints from prediction and reshape according to model's keypoint shape
         pred_kpts = pred[:, 6:].view(pred.shape[0], *self.model.kpt_shape)
-        # Scale keypoints coordinates to match the original image dimensions
         pred_kpts = ops.scale_coords(img.shape[2:], pred_kpts, orig_img.shape)
         result.update(keypoints=pred_kpts)
         return result
@@ -647,7 +590,6 @@ class YoloPredictor(BasePredictor, QObject):
     def setup_source(self, source):
         self.imgsz = check_imgsz(self.args.imgsz, stride=self.model.stride, min_dim=2)
         
-        # 直接移除 crop_fraction 參數，新版的 classify_transforms 不需要也不允許傳入此參數
         self.transforms = (
             getattr(self.model.model, "transforms", classify_transforms(self.imgsz[0]))
             if self.task == "Classify" else None
@@ -659,7 +601,7 @@ class YoloPredictor(BasePredictor, QObject):
         if self.dataset is not None and not hasattr(self.dataset, 'count'):
             self.dataset.count = 0
 
-        self.source_type = self.dataset.source_type
+        self.source_type = self.dataset.source_type if self.dataset else None
         self.vid_writer = {}
         
     def write_results(self, i, p, im, s):
@@ -667,7 +609,7 @@ class YoloPredictor(BasePredictor, QObject):
         if len(im.shape) == 3:
             im = im[None]
 
-        if self.source_type.stream or self.source_type.from_img or self.source_type.tensor:
+        if self.source_type and (self.source_type.stream or self.source_type.from_img or self.source_type.tensor):
             if hasattr(self.dataset, 'count'):
                 self.frame = self.dataset.count
             else:
@@ -676,8 +618,8 @@ class YoloPredictor(BasePredictor, QObject):
             match = re.search(r"frame (\d+)/", s[i])
             self.frame = int(match.group(1)) if match else None
 
-        self.txt_path = self.save_dir / "labels" / (p.stem + ("" if self.dataset.mode == "image" else f"_{self.frame}"))
-        string += f"%gx%g " % im.shape[2:]
+        self.txt_path = self.save_dir / "labels" / (p.stem + ("" if getattr(self.dataset, 'mode', 'image') == "image" else f"_{self.frame}"))
+        string += "%gx%g " % im.shape[2:]
 
         result = self.results[i]
         result.save_dir = str(self.save_dir)
@@ -715,7 +657,7 @@ class YoloPredictor(BasePredictor, QObject):
             for points in self.track_pointlist:
                 cv2.polylines(self.im, [points], isClosed=False, color=(203, 224, 252), thickness=4)
 
-        if self.dataset.mode in {"stream", "video"}:
+        if getattr(self.dataset, 'mode', 'image') in {"stream", "video"}:
             self.fps = self.dataset.fps if self.dataset.mode == "video" else 30
             frames_path = f'{save_path.rsplit(".", 1)[0]}_frames/'
 
