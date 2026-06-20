@@ -39,7 +39,7 @@ Additional Files / Folders:
 ### 4. 必須ディレクトリのコピー
 `config`、`img`、`models`、`ui`、`utils`フォルダを以下にコピーします：
 ```shell
-(your YOLOv8-GUI-PySide6-main PATH)\output\main
+(your YOLOv8-GUI-PySide6-main PATH)\output\main_en
 ```
 
 ### 5. main_en.exeの実行
