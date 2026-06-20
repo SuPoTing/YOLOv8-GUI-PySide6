@@ -13,7 +13,7 @@ Click `create_env.bat` to build a virtual environment with Python 3.10, then act
 
 ### 2. Run the Application
 
-Click `main.bat` to launch the application.
+Click `main_en.bat` to launch the application.
 
 ## Bundling with PyInstaller (via Auto-Py-To-Exe)
 ### 1. Create a Virtual Environment
@@ -44,11 +44,11 @@ Click "Convert .py to .exe".
 ### 4. Copy Essential Directories
 Copy the `config`, `img`, `models`, `ui`, and `utils` folders into:
 ```shell
-(your YOLOv8-GUI-PySide6-main PATH)\output\main
+(your YOLOv8-GUI-PySide6-main PATH)\output\main_en
 ```
 
-### 5. Run main.exe
-Execute `main.exe` inside the output directory to launch the compiled application.
+### 5. Run main_en.exe
+Execute `main_en.exe` inside the output directory to launch the compiled application.
 
 ## Bundling with Nuitka
 ### 1. Create a Virtual Environment
@@ -64,9 +64,9 @@ nuitka --standalone --msvc=latest --lto=yes --enable-plugin=pyside6 --module-par
 
 Copy the `.\venv\Lib\site-packages\ultralytics` folder into the newly generated `.dist` directory.
 
-### 4. Run main.exe
+### 4. Run main_en.exe
 
-Navigate into the `.dist` directory and execute `main.exe` to run the application.
+Navigate into the `.dist` directory and execute `main_en.exe` to run the application.
 
 ## Important Notes
 - `ultralytics` is licensed under the `AGPL-3.0` terms. If you intend to use it for commercial purposes, an official license must be acquired from Ultralytics.
