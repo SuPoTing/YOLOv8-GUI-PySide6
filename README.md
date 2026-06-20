@@ -30,7 +30,7 @@ auto-py-to-exe
 
 Script Location:
 ```shell
-(your YOLOv8-GUI-PySide6-main PATH)\main.py
+(your YOLOv8-GUI-PySide6-main PATH)\main_en.py
 ```
 
 Additional Files / Folders:
@@ -53,12 +53,12 @@ Execute `main.exe` inside the output directory to launch the compiled applicatio
 ## Bundling with Nuitka
 ### 1. Create a Virtual Environment
 
-Click `create_env-nuitka.bat` to generate a Python 3.10 virtual environment, then click activate.bat to activate it.
+Click `create_env-nuitka.bat` to generate a Python 3.10 virtual environment, then click `activate.bat` to activate it.
 
 ### 2. Execute the Nuitka Compilation Command
 
 ```shell
-nuitka --standalone --msvc=latest --lto=yes --enable-plugin=pyside6 --module-parameter=torch-disable-jit=no --include-package=ultralytics main.py
+nuitka --standalone --msvc=latest --lto=yes --enable-plugin=pyside6 --module-parameter=torch-disable-jit=no --include-package=ultralytics main_en.py
 ```
 ### 3. Copy Assets Folder
 
