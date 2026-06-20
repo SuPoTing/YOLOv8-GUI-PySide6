@@ -12,7 +12,7 @@
 `create_env.bat`를 클릭하여Python 3.10기반의 가상 환경을 구축하고 환경을 활성화합니다.
 
 ### 2. 애플리케이션 실행
-`main.bat`를 클릭하여 애플리케이션을 실행합니다.
+`main_en.bat`를 클릭하여 애플리케이션을 실행합니다.
 
 ## PyInstaller를 이용한 패키징 (Auto-Py-To-Exe 경유)
 ### 1. 가상 환경 생성
@@ -26,7 +26,7 @@ auto-py-to-exe
 ### 3. 스크립트 경로 및 추가 파일 추가
 Script Location:
 ```shell
-(your YOLOv8-GUI-PySide6-main PATH)\main.py
+(your YOLOv8-GUI-PySide6-main PATH)\main_en.py
 ```
 
 Additional Files / Folders:
@@ -40,11 +40,11 @@ Additional Files / Folders:
 ### 4. 필수 디렉터리 복사
 `config`, `img`, `models`, `ui`, `utils`폴더를 다음 경로로 복사합니다:
 ```shell
-(your YOLOv8-GUI-PySide6-main PATH)\output\main
+(your YOLOv8-GUI-PySide6-main PATH)\output\main_en
 ```
 
-### 5. main.exe 실행
-출력 디렉터리 내의`main.exe`를 실행하여 컴파일된 애플리케이션을 구동합니다.
+### 5. main_en.exe 실행
+출력 디렉터리 내의`main_en.exe`를 실행하여 컴파일된 애플리케이션을 구동합니다.
 
 ## Nuitka를 이용한 패키징
 ### 1. 가상 환경 생성
@@ -52,13 +52,13 @@ Additional Files / Folders:
 
 ## Nuitka 컴파일 명령 실행
 ```shell
-nuitka --standalone --msvc=latest --lto=yes --enable-plugin=pyside6 --module-parameter=torch-disable-jit=no --include-package=ultralytics main.py
+nuitka --standalone --msvc=latest --lto=yes --enable-plugin=pyside6 --module-parameter=torch-disable-jit=no --include-package=ultralytics main_en.py
 ```
 ### 2. 에셋 폴더 복사
 `.\venv\Lib\site-packages\ultralytics`폴더를 새로 생성된`.dist`디렉터리 내부로 복사합니다.
 
-### 4. main.exe 실행
-`.dist`디렉터리로 이동한 후`main.exe`를 실행하여 애플리케이션을 구동합니다.
+### 4. main_en.exe 실행
+`.dist`디렉터리로 이동한 후`main_en.exe`를 실행하여 애플리케이션을 구동합니다.
 
 ## 중요 참고 사항
 - `ultralytics`는`AGPL-3.0`라이선스 조건에 따라 라이선스가 부여됩니다. 상업적 목적으로 사용하려는 경우, Ultralytics로부터 공식 라이선스를 취득해야 합니다.
