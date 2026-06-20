@@ -11,7 +11,7 @@
 `create_env.bat`をクリックしてPython 3.10の仮想環境を構築し、環境をアクティベートします。
 
 ### 2. アプリケーションの実行
-`main.bat`をクリックしてアプリケーションを起動します。
+`main_en.bat`をクリックしてアプリケーションを起動します。
 
 ## PyInstaller によるパッケージング (Auto-Py-To-Exe 経由)
 ### 1. 仮想環境の構築
@@ -25,7 +25,7 @@ auto-py-to-exe
 ### 3. スクリプトパスと追加ファイルの追加
 Script Location:
 ```shell
-(your YOLOv8-GUI-PySide6-main PATH)\main.py
+(your YOLOv8-GUI-PySide6-main PATH)\main_en.py
 ```
 
 Additional Files / Folders:
@@ -42,8 +42,8 @@ Additional Files / Folders:
 (your YOLOv8-GUI-PySide6-main PATH)\output\main
 ```
 
-### 5. main.exeの実行
-出力ディレクトリ内の`main.exe`を実行して、コンパイルされたアプリケーションを起動します。
+### 5. main_en.exeの実行
+出力ディレクトリ内の`main_en.exe`を実行して、コンパイルされたアプリケーションを起動します。
 
 ## Nuitka によるパッケージング
 ### 1. 仮想環境の構築
@@ -51,13 +51,13 @@ Additional Files / Folders:
 
 ### 2. Nuitkaコンパイルコマンドの実行
 ```shell
-nuitka --standalone --msvc=latest --lto=yes --enable-plugin=pyside6 --module-parameter=torch-disable-jit=no --include-package=ultralytics main.py
+nuitka --standalone --msvc=latest --lto=yes --enable-plugin=pyside6 --module-parameter=torch-disable-jit=no --include-package=ultralytics main_en.py
 ```
 ### 3. アセットフォルダのコピー
 .\venv\Lib\site-packages\ultralytics フォルダを、新しく生成された`.dist`ディレクトリ内にコピーします。
 
-### 4. main.exe の実行
-`.dist`ディレクトリに移動し、`main.exe`を実行してアプリケーションを起動します。
+### 4. main_en.exe の実行
+`.dist`ディレクトリに移動し、`main_en.exe`を実行してアプリケーションを起動します。
 
 ## 重要な注意事項
 - `ultralytics`は`AGPL-3.0`ライセンスの下で提供されています。商用目的で使用する場合は、Ultralytics から正式なライセンスを取得する必要があります。
