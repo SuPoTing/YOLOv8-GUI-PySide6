@@ -173,7 +173,6 @@ class YoloPredictor(QObject, BasePredictor):
                 self.stream_inference()
 
         except Exception as e:
-            # UI Translation: '錯誤: ' -> 'Error: '
             self.yolo2main_status_msg.emit(f'Error: {str(e)}')
             LOGGER.error(f'Error in run: {str(e)}')
             traceback.print_exc()
@@ -222,7 +221,6 @@ class YoloPredictor(QObject, BasePredictor):
                         break
                     
                     self.batch = batch
-                    # UI Translation: '檢測中...' -> 'Detecting...'
                     self.yolo2main_status_msg.emit('Detecting...')
 
                     paths, im0s, s = self.batch
@@ -267,7 +265,6 @@ class YoloPredictor(QObject, BasePredictor):
                 if self.check_completion() or self.stop_dtc:
                     self.release_video_writers()
                     if self.stop_dtc:
-                        # UI Translation: '檢測終止' -> 'Detection Terminated'
                         self.yolo2main_status_msg.emit('Detection Terminated')
                     if hasattr(self.dataset, 'close'):
                         self.dataset.close()
@@ -282,7 +279,6 @@ class YoloPredictor(QObject, BasePredictor):
                 self.start_time = None
 
         except Exception as e:
-            # UI Translation: '錯誤: ' -> 'Error: '
             self.yolo2main_status_msg.emit(f'Error: {str(e)}')
             LOGGER.error(f'Error in stream_inference: {str(e)}')
             traceback.print_exc()
@@ -351,11 +347,9 @@ class YoloPredictor(QObject, BasePredictor):
 
     def check_completion(self):
         if (self.frame == self.frames) and self.frames is not None and self.frame is not None:
-            # UI Translation: '檢測完成' -> 'Detection Completed'
             self.yolo2main_status_msg.emit('Detection Completed')
             return True
         elif self.source_type and self.source_type.stream and self.frames == self.frame + 1:
-            # UI Translation: '檢測完成' -> 'Detection Completed'
             self.yolo2main_status_msg.emit('Detection Completed')
             return True
         return False
