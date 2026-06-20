@@ -94,7 +94,7 @@ pyside6-rcc resources.qrc > ui/resources_rc.py
 - [ ] タイムライン上の動的なターゲットカウントを表示するインタラクティブなデータ可視化チャートを追加する。
 
 ## 参考文献
-- PyQt5-YOLOv5
-- ultralytics
-- PySide6-YOLOv8
-- YOLOSHOW
+- [PyQt5-YOLOv5](https://github.com/Javacr/PyQt5-YOLOv5)
+- [ultralytics](https://github.com/ultralytics/ultralytics)
+- [PySide6-YOLOv8](https://github.com/Jai-wei/YOLOv8-PySide6-GUI/tree/main)
+- [YOLOSHOW](https://github.com/SwimmingLiu/YOLOSHOW/tree/31644373fca58aefcc9dba72a610c92031e5331b)
